@@ -6,6 +6,7 @@
 #include <iostream>
 #include "board.h"
 #include "methodsForEngine.cpp"
+#include <fstream>
 
 class Board {
 private:
@@ -27,6 +28,10 @@ Board::Board(bool wrap, int h, int w)  {
 	width = w;
 	wrapAround = wrap;
 
+	bool this->wrapAround = wrapAround;
+	int this->height = height;
+	int this->width = width;
+
 	bool** matrix = new bool*[width];
 
 	for (int i = 0; i < width; i++) {
@@ -47,7 +52,7 @@ Board::Board(bool wrap, int h, int w)  {
 	delete matrix;
 }
 
-void toggle(int &x, int &y)	//make sure the pointer stuff works
+void Board::toggle(int &x, int &y)	//make sure the pointer stuff works
 {
 	if (matrix[y][x] == false)
 	{
@@ -58,13 +63,13 @@ void toggle(int &x, int &y)	//make sure the pointer stuff works
 	}
 }
 
-bool **getMatrix()
+bool** Board::getMatrix()
 {
-	return matrix;
+	return this->matrix;
 }
 
 //do we need to include int height/width???????????
-void saveState(string fileName, int height, int width)
+void Board::saveState(string fileName, int height, int width)
 {
 	ofstream out(fileName);
 	out << height << "\n";	//first line tells the program the height of the saved matrix
@@ -81,7 +86,7 @@ void saveState(string fileName, int height, int width)
 	out.close();
 }
 
-void addPattern(string fileName, int x, int y)
+void Board::addPattern(string fileName, int x, int y)
 {
 	ifstream in;
 	in.open(fileName.c_str());
@@ -89,16 +94,15 @@ void addPattern(string fileName, int x, int y)
 	if (!in.is_open())
 	{
 		cerr << "File not opened" << endl;
-		return 1;
 	}
 
-	int heightOfSaved = stoi(getline(fileName, line));
+	int heightOfSaved;
 	int widthOfSaved;
 	string line;
 
-	getline(fileName, line);
+	//getline(fileName, line);
 	//now convert to the heightOfSaved
-	getline(fileName, line);
+	//getline(fileName, line);
 	//now convert this to the widthOfSaved
 
 
@@ -119,6 +123,7 @@ int main()
 	std::cin >> width;
 
 	Board test(true, height, width);
+	test.getMatrix();
 
 	std::cin >> width;
 

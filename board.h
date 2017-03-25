@@ -7,7 +7,6 @@ using namespace std;
 
 class Board{
 private:
-	Board(bool wrapAround, int height, int width);
 	bool ** matrix;
 	bool wrapAround;
 	int height;
@@ -17,7 +16,8 @@ private:
 	
 	
 public:
-	void toggle(int x, int y);
+	Board(bool wrapAround, int height, int width);
+	void toggle(int &x, int &y);
 	void runIteration();
 	void runIteration(int runs);
 	void addPattern(string fileName, int x, int y);
@@ -26,7 +26,7 @@ public:
 	
 };
 
-Board(bool wrapAround, int height, int width)
+/*Board::Board(bool wrapAround, int height, int width)
 {
 	bool this->wrapAround = wrapAround;
 	int this->height = height;
@@ -36,4 +36,4 @@ Board(bool wrapAround, int height, int width)
 Board(string fileName)
 {
 	std::string this -> fileName = fileName;
-}
+} */
