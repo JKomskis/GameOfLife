@@ -52,5 +52,35 @@ void addPattern(string fileName, int x, int y)
 	getline(fileName, line);
 	//now convert this to the widthOfSaved
 	
+	//intitialize new patternMatrix
+	bool ** patternMatrix = new bool *[heightOfSaved];
+	for(int i = 0; i < heightOfSaved; i++)
+	{
+		patternMatrix[i] = new bool [widthOfSaved];
+	}
 	
+	//store file values into the patternMatrix
+	int row = 0;
+	while(getline(fileName, line))
+	{
+		for(int i = 0; i <widthOfSaved; i++)
+		{
+			patternMatrix[row][i] = (bool)line[i];
+		}
+		row++;
+	}
+	
+	//now place patternMatrix in matrix
+	int countX = 0;
+	int countY = 0;
+	for(int i = x; i < widthOfSaved+x; i++)
+	{
+		for(int j = y; j < heightOfSaved + y; j++)
+		{
+			matrix[j][i] = patternMatrix[countY][countX];
+			countY++;
+		}
+		countX++;
+	}
+	in.close();
 }
