@@ -1,26 +1,12 @@
 // ConsoleApplication4.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
+//#include "stdafx.h" idk what this is
 #include <string>
 #include <iostream>
 #include "board.h"
-#include "methodsForEngine.cpp"
 #include <fstream>
-
-class Board {
-private:
-	bool wrapAround;
-	int height;
-	int width;
-	bool** matrix;
-	
-public: 
-	Board(bool wrapAround, int height, int width);
-
-	
-};
-
+#include <stdlib.h>
 
 
 Board::Board(bool wrap, int h, int w)  {
@@ -28,11 +14,7 @@ Board::Board(bool wrap, int h, int w)  {
 	width = w;
 	wrapAround = wrap;
 
-	bool this->wrapAround = wrapAround;
-	int this->height = height;
-	int this->width = width;
-
-	bool** matrix = new bool*[width];
+	matrix = new bool*[width];
 
 	for (int i = 0; i < width; i++) {
 		matrix[i] = new bool[height];
@@ -46,10 +28,53 @@ Board::Board(bool wrap, int h, int w)  {
 		std::cout << std::endl;
 	}
 
+	//do we need this?
 	for (int i = 0; i < height; i++) {
 		delete matrix[i];
 	}
 	delete matrix;
+}
+
+Board::Board(string filename)
+{
+
+	wrapAround = false; //need to decide how to determine this from file
+
+	//initialize matrix
+	matrix = new bool*[width];
+
+	for (int i = 0; i < width; i++) {
+		matrix[i] = new bool[height];
+	}
+
+	ifstream in;
+	in.open(filename.c_str());
+
+	if (!in.is_open())
+	{
+		cerr << "File not opened" << endl;
+	}
+
+	string line;
+
+	line = getline(in, line);
+	height = atoi(line.c_str());
+
+	line = getline(in, line);
+	width = atoi(line.c_str());
+
+	int row = 0;
+	while(getline(in, line))
+	{
+		for(int i = 0; i <width; i++)
+		{
+			matrix[row][i] = (bool)line[i];
+		}
+		row++;
+	}
+
+	in.close();
+
 }
 
 void Board::toggle(int &x, int &y)	//make sure the pointer stuff works
@@ -68,8 +93,7 @@ bool** Board::getMatrix()
 	return this->matrix;
 }
 
-//do we need to include int height/width???????????
-void Board::saveState(string fileName, int height, int width)
+void Board::saveState(string fileName)
 {
 	ofstream out(fileName);
 	out << height << "\n";	//first line tells the program the height of the saved matrix
@@ -100,25 +124,56 @@ void Board::addPattern(string fileName, int x, int y)
 	int widthOfSaved;
 	string line;
 
-	//getline(fileName, line);
-	//now convert to the heightOfSaved
-	//getline(fileName, line);
-	//now convert this to the widthOfSaved
+	line = getline(in, line);
+	heightOfSaved = atoi(line.c_str());
 
+	line = getline(in, line);
+	widthOfSaved = atoi(line.c_str());
 
+	//initialize new patternMatrix
+	bool ** patternMatrix = new bool *[heightOfSaved];
+	for(int i = 0; i < heightOfSaved; i++)
+	{
+		patternMatrix[i] = new bool [widthOfSaved];
+	}
+
+	//store file values into the patternMatrix
+	int row = 0;
+	while(getline(in, line))
+	{
+		for(int i = 0; i <widthOfSaved; i++)
+		{
+			patternMatrix[row][i] = (bool)line[i];
+		}
+		row++;
+	}
+
+	//now place patternMatrix in matrix
+	int countX = 0;
+	int countY = 0;
+	for(int i = x; i < widthOfSaved+x; i++)
+	{
+		for(int j = y; j < heightOfSaved + y; j++)
+		{
+			matrix[j][i] = patternMatrix[countY][countX];
+			countY++;
+		}
+		countX++;
+	}
+
+	in.close();
 }
 
 
 int main()
 {
-	bool wrapAround;
-	int width;
+
 	int height;
-	bool** matrix;
+	int width;
 
 	std::cout << "What height do you want the board to have" << std::endl;
 	std::cin >> height;
-	
+
 	std::cout << "What width do you want the board to have" << std::endl;
 	std::cin >> width;
 
@@ -130,4 +185,5 @@ int main()
 
     return 0;
 }
+
 
