@@ -8,44 +8,34 @@
 #include <fstream>
 #include <stdlib.h>
 
+using namespace std;
 
-Board::Board(bool wrap, int h, int w)  {
-	height = h;
-	width = w;
-	wrapAround = wrap;
+Board::Board(bool wrap, int h, int w)
+{
+	this->height = h;
+	this->width = w;
+	this->wrapAround = wrap;
 
-	matrix = new bool*[width];
+	matrix = new bool*[height];
 
-	for (int i = 0; i < width; i++) {
-		matrix[i] = new bool[height];
+	for (int i = 0; i < height; i++)
+	{
+		matrix[i] = new bool[width];
 	}
 
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
-			matrix[i][j] = false;
-			std::cout << matrix[i][j] << " ";
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			matrix[i][j] = 0;
 		}
-		std::cout << std::endl;
 	}
-
-	//do we need this?
-	for (int i = 0; i < height; i++) {
-		delete matrix[i];
-	}
-	delete matrix;
 }
 
 Board::Board(string filename)
 {
 
 	wrapAround = false; //need to decide how to determine this from file
-
-	//initialize matrix
-	matrix = new bool*[width];
-
-	for (int i = 0; i < width; i++) {
-		matrix[i] = new bool[height];
-	}
 
 	ifstream in;
 	in.open(filename.c_str());
@@ -57,18 +47,27 @@ Board::Board(string filename)
 
 	string line;
 
-	line = getline(in, line);
+	getline(in, line);
 	height = atoi(line.c_str());
 
-	line = getline(in, line);
+	getline(in, line);
 	width = atoi(line.c_str());
 
+	//initialize matrix
+	matrix = new bool*[height];
+	for (int i = 0; i < height; i++)
+	{
+		matrix[i] = new bool[width];
+	}
+
 	int row = 0;
+	string a;
 	while(getline(in, line))
 	{
 		for(int i = 0; i <width; i++)
 		{
-			matrix[row][i] = (bool)line[i];
+			a = line[i];
+			matrix[row][i] = atoi(a.c_str());
 		}
 		row++;
 	}
@@ -77,7 +76,7 @@ Board::Board(string filename)
 
 }
 
-void Board::toggle(int &x, int &y)	//make sure the pointer stuff works
+void Board::toggle(int x, int y)	//make sure the pointer stuff works
 {
 	if (matrix[y][x] == false)
 	{
@@ -120,30 +119,31 @@ void Board::addPattern(string fileName, int x, int y)
 		cerr << "File not opened" << endl;
 	}
 
-	int heightOfSaved;
-	int widthOfSaved;
+	int heightOfSaved = 0;
+	int widthOfSaved = 0;
 	string line;
 
-	line = getline(in, line);
+	getline(in, line);
 	heightOfSaved = atoi(line.c_str());
-
-	line = getline(in, line);
+	getline(in, line);
 	widthOfSaved = atoi(line.c_str());
 
 	//initialize new patternMatrix
-	bool ** patternMatrix = new bool *[heightOfSaved];
+	bool **patternMatrix = new bool *[heightOfSaved];
 	for(int i = 0; i < heightOfSaved; i++)
 	{
-		patternMatrix[i] = new bool [widthOfSaved];
+		patternMatrix[i] = new bool[widthOfSaved];
 	}
 
 	//store file values into the patternMatrix
 	int row = 0;
+	string a = "";
 	while(getline(in, line))
 	{
 		for(int i = 0; i <widthOfSaved; i++)
 		{
-			patternMatrix[row][i] = (bool)line[i];
+			a = line[i];
+			patternMatrix[row][i] = atoi(a.c_str());
 		}
 		row++;
 	}
@@ -151,19 +151,20 @@ void Board::addPattern(string fileName, int x, int y)
 	//now place patternMatrix in matrix
 	int countX = 0;
 	int countY = 0;
-	for(int i = x; i < widthOfSaved+x; i++)
+	for(int i = y; i < y + heightOfSaved; i++)
 	{
-		for(int j = y; j < heightOfSaved + y; j++)
+		for(int j = x; j < x + widthOfSaved; j++)
 		{
-			matrix[j][i] = patternMatrix[countY][countX];
+			matrix[i][j] = patternMatrix[countX][countY];
 			countY++;
 		}
 		countX++;
+		countY = 0;
 	}
 
 	in.close();
-}
 
+}
 
 int main()
 {
@@ -171,17 +172,15 @@ int main()
 	int height;
 	int width;
 
-	std::cout << "What height do you want the board to have" << std::endl;
-	std::cin >> height;
+	cout << "Height of board: ";
+	cin >> height;
 
-	std::cout << "What width do you want the board to have" << std::endl;
-	std::cin >> width;
+	cout << "Width of board: ";
+	cin >> width;
 
-	Board test(true, height, width);
+	Board test("boardtest.txt");
+
 	test.getMatrix();
-
-	std::cin >> width;
-
 
     return 0;
 }
