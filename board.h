@@ -21,12 +21,14 @@ public:
 
 	Board(bool wrapAround, int height, int width);
 	Board(string filename);
-	void toggle(int &x, int &y);
+	void toggle(int x, int y);
 	void runIteration();
 	void runIteration(int runs);
 	void addPattern(string fileName, int x, int y);
 	bool ** getMatrix();
 	void saveState(string fileName);
+	int getHeight();
+	int getWidth();
 
 };
 

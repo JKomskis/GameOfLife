@@ -94,7 +94,7 @@ bool** Board::getMatrix()
 
 void Board::saveState(string fileName)
 {
-	ofstream out(fileName);
+	ofstream out(fileName.c_str());
 	out << height << "\n";	//first line tells the program the height of the saved matrix
 	out << width << "\n";	//second line tells the program the width of the saved matrix
 
@@ -166,7 +166,17 @@ void Board::addPattern(string fileName, int x, int y)
 
 }
 
-int main()
+int Board::getHeight()
+{
+	return height;
+}
+
+int Board::getWidth()
+{
+	return width;
+}
+
+/*int main()
 {
 
 	int height;
@@ -183,6 +193,6 @@ int main()
 	test.getMatrix();
 
     return 0;
-}
+}*/
 
 
