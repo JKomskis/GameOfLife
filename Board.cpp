@@ -1,7 +1,7 @@
 // ConsoleApplication4.cpp : Defines the entry point for the console application.
 //
 
-//#include "stdafx.h" idk what this is
+
 #include <string>
 #include <iostream>
 #include "board.h"
@@ -76,7 +76,7 @@ Board::Board(string filename)
 
 }
 
-void Board::toggle(int x, int y)	//make sure the pointer stuff works
+void Board::toggle(int x, int y)
 {
 	if (matrix[y][x] == false)
 	{
@@ -87,8 +87,57 @@ void Board::toggle(int x, int y)	//make sure the pointer stuff works
 	}
 }
 
+void Board::runIteration()
+{
+	for(int r = 0; r < height; r++)
+	{
+		for(int c = 0; c < width; c++)
+		{
+			int count = 0;
+			if(r != 0 && c != 0 && matrix[r-1][c-1])
+				count++;
+			if(r != 0 && matrix[r-1][c])
+				count++;
+			if(r != 0 && c+1 != width && matrix[r-1][c+1])
+				count++;
+			if(c != 0 && matrix[r][c-1])
+				count++;
+			if(c+1 != width && matrix[r][c+1])
+				count++;
+			if(r+1 != height && c != 0 && matrix[r+1][c-1])
+				count++;
+			if(r+1 != height && matrix[r+1][c])
+				count++;
+			if(r+1 != height && c+1 != width && matrix[r+1][c+1])
+				count++;
+
+			if(matrix[r][c])
+			{
+				if(count < 2)
+					toggle(r, c);
+				else if(count > 3)
+					toggle(r, c);
+			}
+			else
+			{
+				if(count == 3)
+					toggle(r, c);
+			}
+		}
+	}
+}
+
 bool** Board::getMatrix()
 {
+	for(int i = 0; i < height; i++)
+	{
+		for(int j = 0; j < width; j++)
+		{
+			cout << matrix[i][j] << " ";
+		}
+		cout << endl;
+	}
+
 	return this->matrix;
 }
 
@@ -188,7 +237,14 @@ int Board::getWidth()
 	cout << "Width of board: ";
 	cin >> width;
 
-	Board test("boardtest.txt");
+	Board test(false, height, width);
+
+	test.addPattern("patterntest.txt", 1, 1);
+
+	test.getMatrix();
+	cout << endl;
+
+	test.runIteration();
 
 	test.getMatrix();
 
