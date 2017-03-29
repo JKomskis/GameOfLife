@@ -9,6 +9,16 @@ and may not be redistributed without written permission.*/
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+void setPixel(SDL_Surface* screenSurface, int x, int y, Uint32 color)
+{
+	SDL_Rect dst;
+	dst.x = x;
+	dst.y = y;
+	dst.w = 1;
+	dst.h = 1;
+	SDL_FillRect(screenSurface, &dst, color);
+}
+
 int main( int argc, char* args[] )
 {
 	//The window we'll be rendering to
@@ -36,13 +46,19 @@ int main( int argc, char* args[] )
 			screenSurface = SDL_GetWindowSurface( window );
 
 			//Fill the surface white
-			SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0xFF, 0xFF, 0xFF ) );
+			SDL_FillRect( screenSurface, NULL, 0 );
 			
 			//Update the surface
 			SDL_UpdateWindowSurface( window );
-
+			for(int i=0; i < 4 * 480; i++)
+			{
+				setPixel(screenSurface, i % SCREEN_WIDTH, i % SCREEN_HEIGHT, 0xFFFFFF);
+				SDL_UpdateWindowSurface( window );
+				SDL_Delay( 0 );
+				
+			}
 			//Wait two seconds
-			SDL_Delay( 2000 );
+			SDL_Delay( 100 );
 		}
 	}
 
