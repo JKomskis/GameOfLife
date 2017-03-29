@@ -1,6 +1,6 @@
 // ConsoleApplication4.cpp : Defines the entry point for the console application.
 //
-
+//This is a test
 
 #include <string>
 #include <iostream>
@@ -236,6 +236,12 @@ void Board::addPattern(string fileName, int x, int y)
 			patternMatrix[row][i] = atoi(a.c_str());
 		}
 		row++;
+	}
+	
+	//check if the pattern will fit in the pattern matrix
+	if(heightOfSaved <= height || widthOfSaved <= width)
+	{
+		cerr << "Saved Pattern is larger than board" << endl;
 	}
 
 	//now place patternMatrix in matrix
