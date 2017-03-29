@@ -42,7 +42,7 @@ Board::Board(string filename)
 
 	if (!in.is_open())
 	{
-		cerr << "File not opened" << endl;
+		cerr << "File not opened '" << filename << "'" << endl;
 	}
 
 	string line;
@@ -114,8 +114,12 @@ int Board::numNeigh(int r, int c)
 
 void Board::runIteration()
 {
-	int nMatrix[height][width] = {0};	//short for "neighbor matrix" - stores the number of neighbours a number at a given spot has
-	
+	int **nMatrix = new int*[height];
+
+	for (int i = 0; i < height; i++)
+	{
+		nMatrix[i] = new int[width];
+	}
 	for(int r = 0; r < height; r++)
 	{
 		for(int c = 0; c < width; c++)
@@ -130,7 +134,7 @@ void Board::runIteration()
 	{
 		for(int c = 0; c < width; c++)
 		{
-			if(matrix[r][c] == 1)	//if the cell is alive (equal to 1)	
+			if(matrix[r][c] == 1)	//if the cell is alive (equal to 1)
 			{
 				if(nMatrix[r][c] < 2)	//Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
 				{
@@ -154,7 +158,7 @@ void Board::runIteration()
 			}
 		}
 	}
-	
+
 }
 
 void Board::runIteration(int runs)	//runs the interation the correct number of times
@@ -170,14 +174,14 @@ void Board::runIteration(int runs)	//runs the interation the correct number of t
 
 bool** Board::getMatrix()
 {
-	for(int i = 0; i < height; i++)
+	/*for(int i = 0; i < height; i++)
 	{
 		for(int j = 0; j < width; j++)
 		{
 			cout << matrix[i][j] << " ";
 		}
 		cout << endl;
-	}
+	}*/
 
 	return this->matrix;
 }
@@ -237,7 +241,7 @@ void Board::addPattern(string fileName, int x, int y)
 		}
 		row++;
 	}
-	
+
 	//check if the pattern will fit in the pattern matrix
 	if(heightOfSaved <= height || widthOfSaved <= width)
 	{
@@ -272,7 +276,7 @@ int Board::getWidth()
 	return width;
 }
 
-int main()
+/*int main()
 {
 
 	int height;
@@ -283,10 +287,10 @@ int main()
 
 	cout << "Width of board: ";
 	cin >> width;
-	
+
 	std::cout << "Add a board called test\n";
 	Board test(false, height, width);
-	
+
 	std::cout << "Print out the matrix:\n";
 	test.getMatrix();
 	cout << endl;
@@ -305,13 +309,11 @@ int main()
 	std::cout << "This is the matrix now\n";
 	test.getMatrix();
 	cout << endl;
-	
+
 	test.runIteration(3);
 	std::cout << "This is the matrix after 3 runIterations\n";
 	test.getMatrix();
 	cout << endl;
 
     return 0;
-}
-
-
+}*/

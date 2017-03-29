@@ -57,7 +57,7 @@ int Controller::getMainMenuChoice()
                                     termRow / 2 - MAIN_MENU_HEIGHT / 2, termCol / 2 - MAIN_MENU_WIDTH / 2);
     keypad(my_menu_win, TRUE);
     PANEL *menuPanel = new_panel(my_menu_win);
-     
+
 	/* Set main window and sub window */
     set_menu_win(my_menu, my_menu_win);
     set_menu_sub(my_menu, derwin(my_menu_win, 4, 25, 2, 1));
@@ -69,7 +69,7 @@ int Controller::getMainMenuChoice()
     box(my_menu_win, 0, 0);
 	//print_in_middle(my_menu_win, 1, 0, 40, "My Menu", COLOR_PAIR(1));
 	refresh();
-        
+
 	/* Post the menu */
 	post_menu(my_menu);
     show_panel(menuPanel);
@@ -85,7 +85,7 @@ int Controller::getMainMenuChoice()
 				break;
 		}
                 wrefresh(my_menu_win);
-	}	
+	}
 
 	/* Unpost and free all the memory taken up */
     int choice = item_index(current_item(my_menu));
@@ -166,7 +166,7 @@ std::string Controller::getStringInput()
 	set_field_back(field[0], A_UNDERLINE);
 	field_opts_off(field[0], O_AUTOSKIP);
     field_opts_off(field[0], O_STATIC);
-    set_max_field(field[0], 30); 
+    set_max_field(field[0], 30);
 	FORM *my_form = new_form(field);
 	scale_form(my_form, &rows, &cols);
     WINDOW *my_form_win = newwin(rows + 4, cols + 4, termRow / 2 - (rows + 4) / 2, termCol / 2 - termCol / 8);
@@ -182,9 +182,9 @@ std::string Controller::getStringInput()
     wchar_t ch;
 	/* Loop through to get user requests */
 	while((ch = wgetch(my_form_win)) != 10)
-	{	
+	{
         switch(ch)
-		{	
+		{
             case KEY_LEFT:
 			    form_driver(my_form, REQ_PREV_CHAR);
 			    break;
@@ -198,11 +198,13 @@ std::string Controller::getStringInput()
             case KEY_DC:
                 form_driver(my_form, REQ_DEL_CHAR);
                 break;
-			default:	
+			default:
 				form_driver(my_form, ch);
 				break;
 		}
 	}
+    form_driver(my_form, REQ_VALIDATION);
+    std::string filename = field_buffer(field[0], 0);
     curs_set(FALSE);
     unpost_form(my_form);
 	free_form(my_form);
@@ -211,5 +213,5 @@ std::string Controller::getStringInput()
     delwin(my_form_win);
     del_panel(formPanel);
     updateScreen();
-    return field_buffer(field[0], 0);
+    return filename;
 }
