@@ -91,7 +91,7 @@ void Board::toggle(int r, int c)	//toggles the cell from true to false or false 
 int Board::numNeigh(int r, int c)
 {
 	int count = 0;
-	
+
 	if (r != 0 && c != 0 && matrix[r - 1][c - 1] == 1)	//check that this cell is not on the top or left edge and that the number to the top left exists and is not 0
 		count++;
 	if (r != 0 && matrix[r - 1][c] == 1)	//check that this cell is not at the top and that the cell directly above it exists and is not 0
@@ -108,7 +108,7 @@ int Board::numNeigh(int r, int c)
 		count++;
 	if (r + 1 != height && c + 1 != width && matrix[r + 1][c + 1] == 1)	//check if the cell is not on the bottom or right edge and that the cell to the bottom right exists and is not 0
 		count++;
-	
+
 
 	if(wrapAround) {                                                               //check to make sure this board has wrapAround enabled
 		if (r = 0 && matrix[height - 1][c] == 1) {               //check if this cell is on the top row (but not necessarily in a corner). If it is, it should count the bottom row and same column as a neighbor.
@@ -145,18 +145,13 @@ int Board::numNeigh(int r, int c)
 
 void Board::runIteration()
 {
-<<<<<<< HEAD
+
 	int **nMatrix = new int*[height];
 
 	for (int i = 0; i < height; i++)
 	{
 		nMatrix[i] = new int[width];
 	}
-=======
-	int nMatrix[height][width] = {0};	//short for "neighbor matrix" - stores the number of neighbours a number at a given spot has
-	
-
->>>>>>> e01dc7a9512db1f769a6ce017c65ea31b2001c93
 	for(int r = 0; r < height; r++)
 	{
 		for(int c = 0; c < width; c++)
