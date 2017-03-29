@@ -1,7 +1,7 @@
 #include "Controller.h"
 
-#define MAIN_MENU_HEIGHT 6
-#define MAIN_MENU_WIDTH 40
+#define MAIN_MENU_HEIGHT 7
+#define MAIN_MENU_WIDTH 28
 #define BOARD_HEIGHT termRow * .9
 #define BOARD_WIDTH termCol
 
@@ -24,18 +24,6 @@ Controller::Controller()
     statusPanel = new_panel(statusWin);
     box(statusWin, 0, 0);
     updateStatusWin();
-    //Create Main Menu
-    WINDOW *mainMenuWin = newwin(MAIN_MENU_HEIGHT, MAIN_MENU_WIDTH,
-                            termRow / 2 - MAIN_MENU_HEIGHT / 2, termCol / 2 - MAIN_MENU_WIDTH / 2);
-    keypad(mainMenuWin, TRUE);
-    mainMenuPanel = new_panel(mainMenuWin);
-    box(mainMenuWin, 0, 0);
-    printCenter(mainMenuWin, "Conway's Game of Life", 0, 40);
-    mvwprintw(mainMenuWin, 1, 2, "Load a new board");
-    mvwprintw(mainMenuWin, 2, 2, "Load a saved board");
-    mvwprintw(mainMenuWin, 3, 2, "Load a random board");
-    mvwprintw(mainMenuWin, 4, 2, "Load the pattern editor");
-    mvwprintw(mainMenuWin, 1, 1, ">");
     updateScreen();
 }
 
@@ -53,48 +41,73 @@ void Controller::updateScreen()
 
 int Controller::getMainMenuChoice()
 {
-    WINDOW* mainMenuWin = panel_window(mainMenuPanel);
-    show_panel(mainMenuPanel);
-    update_panels();
-    doupdate();
-    wchar_t c = 'a';
-    int x = 0, y = 0;
-    while((c = wgetch(mainMenuWin)) != '\n')
-	{
-        getyx(mainMenuWin, y, x);
-        switch(c)
-	    {
-            case KEY_DOWN:
-                mvwprintw(mainMenuWin, y, --x, " ");
-                ++y;
-                if(y == MAIN_MENU_HEIGHT-1)
-                    y = 1;
-                mvwprintw(mainMenuWin, y, x, ">");
-                update_panels();
-                doupdate();
+    ITEM **choices = new ITEM*[5];
+    choices[0] = new_item("Load a new board", "Load a new board");
+    choices[1] = new_item("Load a saved board", "Load a saved board");
+    choices[2] = new_item("Load a random board", "Load a random board");
+    choices[3] = new_item("Load the pattern editor", "Load the pattern editor");
+    choices[4] = NULL;
+	/* Crate menu */
+	MENU *my_menu = new_menu(choices);
+    menu_opts_off(my_menu, O_NONCYCLIC);
+    menu_opts_off(my_menu, O_SHOWDESC);
+
+	/* Create the window to be associated with the menu */
+    WINDOW *my_menu_win = newwin(MAIN_MENU_HEIGHT, MAIN_MENU_WIDTH,
+                                    termRow / 2 - MAIN_MENU_HEIGHT / 2, termCol / 2 - MAIN_MENU_WIDTH / 2);
+    keypad(my_menu_win, TRUE);
+    PANEL *menuPanel = new_panel(my_menu_win);
+     
+	/* Set main window and sub window */
+    set_menu_win(my_menu, my_menu_win);
+    set_menu_sub(my_menu, derwin(my_menu_win, 4, 25, 2, 1));
+
+	/* Set menu mark to the string " * " */
+    set_menu_mark(my_menu, ">");
+    printCenter(my_menu_win, "Main Menu", 1, 28);
+	/* Print a border around the main window and print a title */
+    box(my_menu_win, 0, 0);
+	//print_in_middle(my_menu_win, 1, 0, 40, "My Menu", COLOR_PAIR(1));
+	refresh();
+        
+	/* Post the menu */
+	post_menu(my_menu);
+    show_panel(menuPanel);
+	wrefresh(my_menu_win);
+    wchar_t ch;
+	while((ch = wgetch(my_menu_win)) != 10)
+	{       switch(ch)
+	        {	case KEY_DOWN:
+				menu_driver(my_menu, REQ_DOWN_ITEM);
 				break;
 			case KEY_UP:
-                mvwprintw(mainMenuWin, y, --x, " ");
-                --y;
-                if(y == 0)
-                    y = MAIN_MENU_HEIGHT - 2;
-                mvwprintw(mainMenuWin, y, x, ">");
-                update_panels();
-                doupdate();
+				menu_driver(my_menu, REQ_UP_ITEM);
 				break;
 		}
-	}
-    hide_panel(mainMenuPanel);
-    update_panels();
-    doupdate();
-    getyx(mainMenuWin, y, x);
-    return y;
+                wrefresh(my_menu_win);
+	}	
+
+	/* Unpost and free all the memory taken up */
+    int choice = item_index(current_item(my_menu));
+    unpost_menu(my_menu);
+    free_menu(my_menu);
+    for(int i = 0; i < 5; ++i)
+            free_item(choices[i]);
+    hide_panel(menuPanel);
+    updateScreen();
+    return choice;
 }
 
 void Controller::createNewBoard(bool wrapAround)
 {
     delete board;
     board = new Board(wrapAround, BOARD_HEIGHT - 2, BOARD_WIDTH - 2);
+}
+
+void Controller::createNewBoard(std::string filename)
+{
+    delete board;
+    board = new Board(filename);
 }
 
 int Controller::getTermRow()
@@ -141,4 +154,62 @@ void Controller::updateStatusWin()
     wprintw(statusWin, "\t");
     wprintw(statusWin, "%.2f", speed/1000);
     updateScreen();
+}
+
+std::string Controller::getStringInput()
+{
+    curs_set(TRUE);
+    FIELD *field[2];
+	int rows, cols;
+	field[0] = new_field(1, termCol / 4, 1, 1, 0, 0);
+	field[1] = NULL;
+	set_field_back(field[0], A_UNDERLINE);
+	field_opts_off(field[0], O_AUTOSKIP);
+    field_opts_off(field[0], O_STATIC);
+    set_max_field(field[0], 30); 
+	FORM *my_form = new_form(field);
+	scale_form(my_form, &rows, &cols);
+    WINDOW *my_form_win = newwin(rows + 4, cols + 4, termRow / 2 - (rows + 4) / 2, termCol / 2 - termCol / 8);
+    PANEL *formPanel = new_panel(my_form_win);
+    keypad(my_form_win, TRUE);
+    set_form_win(my_form, my_form_win);
+    set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
+    box(my_form_win, 0, 0);
+    printCenter(my_form_win, "Enter a filename:", 1, cols);
+	post_form(my_form);
+    show_panel(formPanel);
+	updateScreen();
+    wchar_t ch;
+	/* Loop through to get user requests */
+	while((ch = wgetch(my_form_win)) != 10)
+	{	
+        switch(ch)
+		{	
+            case KEY_LEFT:
+			    form_driver(my_form, REQ_PREV_CHAR);
+			    break;
+			case KEY_RIGHT:
+			    form_driver(my_form, REQ_NEXT_CHAR);
+			    break;
+            case KEY_BACKSPACE:
+                form_driver(my_form, REQ_PREV_CHAR);
+                form_driver(my_form, REQ_DEL_CHAR);
+                break;
+            case KEY_DC:
+                form_driver(my_form, REQ_DEL_CHAR);
+                break;
+			default:	
+				form_driver(my_form, ch);
+				break;
+		}
+	}
+    curs_set(FALSE);
+    unpost_form(my_form);
+	free_form(my_form);
+	free_field(field[0]);
+    hide_panel(formPanel);
+    delwin(my_form_win);
+    del_panel(formPanel);
+    updateScreen();
+    return field_buffer(field[0], 0);
 }
