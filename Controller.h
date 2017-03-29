@@ -1,5 +1,7 @@
 #include <ncurses.h>
 #include <panel.h>
+#include <form.h>
+#include <menu.h>
 #include <string>
 #include "board.h"
 
@@ -16,9 +18,11 @@ class Controller
     public:
         Controller();
         void createNewBoard(bool wrapAround);
+        void createNewBoard(std::string filename);
         int getMainMenuChoice();
         int getSpeed();
         std::string getState();
+        std::string getStringInput();
         int getTermCol();
         int getTermRow();
         void printCenter(WINDOW *win, std::string str, int row, int width);

@@ -1,6 +1,5 @@
 #include "Controller.h"
 
-
 int main()
 {
     //Setup
@@ -12,22 +11,23 @@ int main()
     keypad(stdscr, TRUE);
     Controller *controller = new Controller();
     controller->updateScreen();
+    std::string filename = "";
     switch( controller->getMainMenuChoice() )
     {
-        case 1:
+        case 0:
             //Create a new blank board
             controller->createNewBoard(true);
             break;
-        case 2:
+        case 1:
             //Load a saved board
             //ADD WAY TO GET FILENAME
-            //Board board = new Board(filename);
-            //controller->setBoard(board);
+            filename = controller->getStringInput();
+            controller->createNewBoard(filename);
             break;
-        case 3:
+        case 2:
             //Load a random board
             break;
-        case 4:
+        case 3:
             //Load the pattern editor
             break;
     }
