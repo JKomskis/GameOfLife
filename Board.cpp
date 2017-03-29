@@ -76,54 +76,95 @@ Board::Board(string filename)
 
 }
 
-void Board::toggle(int x, int y)
+void Board::toggle(int r, int c)	//toggles the cell from true to false or false to true
 {
-	if (matrix[y][x] == false)
+	if (matrix[r][c] == false)	//if the cell at r,c is false, make it true
 	{
-		matrix[y][x] = true;
+		matrix[r][c] = true;
 	}
-	else {
-		matrix[y][x] = false;
+	else	//otherwise, make it false
+	{
+		matrix[r][c] = false;
 	}
 }
 
+int Board::numNeigh(int r, int c)
+{
+	int count = 0;
+	if(r != 0 && c != 0 && matrix[r-1][c-1] == 1)	//check that this cell is not on the top or left edge and that the number to the top left exists and is not 0
+		count++;
+	if(r != 0 && matrix[r-1][c] == 1)	//check that this cell is not at the top and that the cell directly above it exists and is not 0
+		count++;
+	if(r != 0 && c+1 != width && matrix[r-1][c+1] == 1)	//check that this cell is not at the top or at the right edge and that the cell to the top right exists and is not 0
+		count++;
+	if(c != 0 &&  matrix[r][c-1] == 1)	//check that this cell is not at the left edge and that the cell directly to the left exists and is not 0
+		count++;
+	if(c+1 != width && matrix[r][c+1] == 1)	//check that this cell is not on the right edge and that the cell directly to the right exists and is not 0
+		count++;
+	if(r+1 != height && c != 0 && matrix[r+1][c-1] == 1)	//check that this cell is not on the bottom edge and not on the left and that the cell to the bottom left exists and is not 0
+		count++;//1
+	if(r+1 != height && matrix[r+1][c] == 1)	//check if the cell is not on the bottom edge and that the cell below it exists and is not 0
+		count++;
+	if(r+1 != height && c+1 != width && matrix[r+1][c+1] == 1)	//check if the cell is not on the bottom or right edge and that the cell to the bottom right exists and is not 0
+		count++;
+	return count;
+}
+
+
+
 void Board::runIteration()
 {
+	int nMatrix[height][width] = {0};	//short for "neighbor matrix" - stores the number of neighbours a number at a given spot has
+	
 	for(int r = 0; r < height; r++)
 	{
 		for(int c = 0; c < width; c++)
 		{
-			int count = 0;
-			if(r != 0 && c != 0 && matrix[r-1][c-1])
-				count++;
-			if(r != 0 && matrix[r-1][c])
-				count++;
-			if(r != 0 && c+1 != width && matrix[r-1][c+1])
-				count++;
-			if(c != 0 && matrix[r][c-1])
-				count++;
-			if(c+1 != width && matrix[r][c+1])
-				count++;
-			if(r+1 != height && c != 0 && matrix[r+1][c-1])
-				count++;
-			if(r+1 != height && matrix[r+1][c])
-				count++;
-			if(r+1 != height && c+1 != width && matrix[r+1][c+1])
-				count++;
-
-			if(matrix[r][c])
+			nMatrix[r][c] = numNeigh(r, c);
+			//std::cout << nMatrix[r][c] << " ";
+		}
+		//std::cout << endl;
+	}
+	//std::cout << "Now we are looking at if the cells do what they are supposed to:\n";
+	for(int r = 0; r < height; r++)
+	{
+		for(int c = 0; c < width; c++)
+		{
+			if(matrix[r][c] == 1)	//if the cell is alive (equal to 1)	
 			{
-				if(count < 2)
+				if(nMatrix[r][c] < 2)	//Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
+				{
 					toggle(r, c);
-				else if(count > 3)
+					//std::cout << "For " << r << ", " << c << " we changed it to a 0 because we had <2: " << nMatrix[r][c] <<endl;
+				}
+				else if(nMatrix[r][c] > 3)	//Any live cell with more than three live neighbours dies, as if by overpopulation.
+				{
 					toggle(r, c);
+					//std::cout << "For " << r << ", " << c << " we changed it to a 0 because we had >3: " << nMatrix[r][c] << endl;
+				}
+				//if neither of these is true, the cell stays alive
 			}
-			else
+			else	//if the cell is dead (equal to 0)
 			{
-				if(count == 3)
+				if(nMatrix[r][c] == 3)	//Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+				{
 					toggle(r, c);
+					//std::cout << "For " << r << ", " << c << " we changed it to a 1 because we had ==3: " << nMatrix[r][c] << endl;
+				}
 			}
 		}
+	}
+	
+}
+
+void Board::runIteration(int runs)	//runs the interation the correct number of times
+{
+	for(int i = 0; i < runs; i++)
+	{
+		runIteration();
+		std::cout << "This is the matrix after " << i + 1 << " iterations.\n";
+		getMatrix();
+		cout << endl;
 	}
 }
 
@@ -172,10 +213,10 @@ void Board::addPattern(string fileName, int x, int y)
 	int widthOfSaved = 0;
 	string line;
 
-	getline(in, line);
-	heightOfSaved = atoi(line.c_str());
-	getline(in, line);
-	widthOfSaved = atoi(line.c_str());
+	getline(in, line);					//read out the heightOfSaved
+	heightOfSaved = atoi(line.c_str());	//make it an int
+	getline(in, line);					//read out the widthOfSaved
+	widthOfSaved = atoi(line.c_str());	//make it an int
 
 	//initialize new patternMatrix
 	bool **patternMatrix = new bool *[heightOfSaved];
@@ -225,7 +266,7 @@ int Board::getWidth()
 	return width;
 }
 
-/*int main()
+int main()
 {
 
 	int height;
@@ -236,19 +277,35 @@ int Board::getWidth()
 
 	cout << "Width of board: ";
 	cin >> width;
-
+	
+	std::cout << "Add a board called test\n";
 	Board test(false, height, width);
-
-	test.addPattern("patterntest.txt", 1, 1);
-
+	
+	std::cout << "Print out the matrix:\n";
 	test.getMatrix();
 	cout << endl;
 
+	std::cout << "Add a pattern called patterntest.txt and then print out the matrix\n";
+	test.addPattern("patterntest.txt", 1, 1);
+	test.getMatrix();
+	cout << endl;
+
+	//test.getMatrix();
+	//cout << endl;
+
+	std::cout << "Try running the runIteration function: \n";
 	test.runIteration();
 
+	std::cout << "This is the matrix now\n";
 	test.getMatrix();
+	cout << endl;
+	
+	test.runIteration(3);
+	std::cout << "This is the matrix after 3 runIterations\n";
+	test.getMatrix();
+	cout << endl;
 
     return 0;
-}*/
+}
 
 

@@ -29,8 +29,13 @@ public:
 	void saveState(string fileName);
 	int getHeight();
 	int getWidth();
+	int numNeigh(int r, int c);
+	int countNeigh(int r, int c);
 
 };
 
 
 #endif /* BOARD_H_ */
+
+
+
