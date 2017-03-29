@@ -91,22 +91,53 @@ void Board::toggle(int r, int c)	//toggles the cell from true to false or false 
 int Board::numNeigh(int r, int c)
 {
 	int count = 0;
-	if(r != 0 && c != 0 && matrix[r-1][c-1] == 1)	//check that this cell is not on the top or left edge and that the number to the top left exists and is not 0
+	
+	if (r != 0 && c != 0 && matrix[r - 1][c - 1] == 1)	//check that this cell is not on the top or left edge and that the number to the top left exists and is not 0
 		count++;
-	if(r != 0 && matrix[r-1][c] == 1)	//check that this cell is not at the top and that the cell directly above it exists and is not 0
+	if (r != 0 && matrix[r - 1][c] == 1)	//check that this cell is not at the top and that the cell directly above it exists and is not 0
 		count++;
-	if(r != 0 && c+1 != width && matrix[r-1][c+1] == 1)	//check that this cell is not at the top or at the right edge and that the cell to the top right exists and is not 0
+	if (r != 0 && c + 1 != width && matrix[r - 1][c + 1] == 1)	//check that this cell is not at the top or at the right edge and that the cell to the top right exists and is not 0
 		count++;
-	if(c != 0 &&  matrix[r][c-1] == 1)	//check that this cell is not at the left edge and that the cell directly to the left exists and is not 0
+	if (c != 0 && matrix[r][c - 1] == 1)	//check that this cell is not at the left edge and that the cell directly to the left exists and is not 0
 		count++;
-	if(c+1 != width && matrix[r][c+1] == 1)	//check that this cell is not on the right edge and that the cell directly to the right exists and is not 0
+	if (c + 1 != width && matrix[r][c + 1] == 1)	//check that this cell is not on the right edge and that the cell directly to the right exists and is not 0
 		count++;
-	if(r+1 != height && c != 0 && matrix[r+1][c-1] == 1)	//check that this cell is not on the bottom edge and not on the left and that the cell to the bottom left exists and is not 0
+	if (r + 1 != height && c != 0 && matrix[r + 1][c - 1] == 1)	//check that this cell is not on the bottom edge and not on the left and that the cell to the bottom left exists and is not 0
 		count++;//1
-	if(r+1 != height && matrix[r+1][c] == 1)	//check if the cell is not on the bottom edge and that the cell below it exists and is not 0
+	if (r + 1 != height && matrix[r + 1][c] == 1)	//check if the cell is not on the bottom edge and that the cell below it exists and is not 0
 		count++;
-	if(r+1 != height && c+1 != width && matrix[r+1][c+1] == 1)	//check if the cell is not on the bottom or right edge and that the cell to the bottom right exists and is not 0
+	if (r + 1 != height && c + 1 != width && matrix[r + 1][c + 1] == 1)	//check if the cell is not on the bottom or right edge and that the cell to the bottom right exists and is not 0
 		count++;
+	
+
+	if(wrapAround) {                                                               //check to make sure this board has wrapAround enabled
+		if (r = 0 && matrix[height - 1][c] == 1) {               //check if this cell is on the top row (but not necessarily in a corner). If it is, it should count the bottom row and same column as a neighbor.
+			count++;
+		}
+		if (c = 0 && matrix[r][width - 1] == 1) {                //check if this cell is on the left column (but not necessarily a corner). Wraps around the left column to the right.
+			count++;
+		}
+		if (r + 1 == height && matrix[0][c]) {                              //check if this cell is on the bottom row (but not necessarily a corner). Wraps around the bottom row to the top.
+			count++;
+		}
+		if (c + 1 == width && matrix[r][0]) {                               //check if this cell is on the right column (but not necessarily a corner). Wraps around the right column to the left.
+			count++;
+		}
+		if (c == 0 && r == 0 && matrix[height - 1][width - 1] == 1) {                  //check if this cell is on the top left corner. Wraps around the top left corner to the bottom right corner.
+			count++;
+		}
+		if (c == 0 && r + 1 == height && matrix[0][width - 1] == 1) {                  //check if this cell is on the bottom left corner. Wraps around the bottom left corner to the top right corner.
+			count++;
+		}
+		if (c + 1 == width && r == 0 && matrix[height - 1][0] == 1) {                  //check if this cell is on the top right corner. Wraps around the top right corner to the bottom left corner.
+			count++;
+		}
+		if (c + 1 == width && r + 1 == height && matrix[0][0] == 1) {                  //check if this cell is on the bottom right corner. Wraps around the bottom right corner to the top left corner.
+			count++;
+		}
+
+	}
+
 	return count;
 }
 
@@ -116,6 +147,7 @@ void Board::runIteration()
 {
 	int nMatrix[height][width] = {0};	//short for "neighbor matrix" - stores the number of neighbours a number at a given spot has
 	
+
 	for(int r = 0; r < height; r++)
 	{
 		for(int c = 0; c < width; c++)
