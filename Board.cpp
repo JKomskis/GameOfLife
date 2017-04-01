@@ -81,6 +81,19 @@ void Board::toggle(int r, int c)	//toggles the cell from true to false or false 
 	matrix[r][c] = !matrix[r][c];
 }
 
+void Board::randomize()
+{
+	for (int r = 0; r < getHeight(); r++)
+	{
+		for (int c = 0; c < getWidth(); c++)
+		{
+			if (std::rand() % 2) {
+				toggle(r, c);
+			}
+		}
+	}
+}
+
 int Board::numNeigh(int r,int c)
 {
 	/*creating a count variable, setting it equal to -1 if cell is alive (thus
@@ -181,14 +194,16 @@ void Board::runIteration(int runs)	//runs the interation the correct number of t
 
 bool** Board::getMatrix()
 {
-	/*for(int i = 0; i < height; i++)
+	/*
+	for(int i = 0; i < height; i++)
 	{
 		for(int j = 0; j < width; j++)
 		{
 			cout << matrix[i][j] << " ";
 		}
 		cout << endl;
-	}*/
+	}
+	*/
 
 	return this->matrix;
 }
@@ -282,8 +297,8 @@ int Board::getWidth()
 {
 	return width;
 }
-
-/*int main()
+/*
+int main()
 {
 
 	int height;
@@ -322,5 +337,10 @@ int Board::getWidth()
 	test.getMatrix();
 	cout << endl;
 
+	test.randomize(1);
+	test.getMatrix();
+	cout << endl;
+
     return 0;
-}*/
+}
+*/

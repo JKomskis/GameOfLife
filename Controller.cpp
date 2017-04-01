@@ -5,13 +5,14 @@
 #define BOARD_HEIGHT termRow * .9
 #define BOARD_WIDTH termCol
 
+#include <iostream>
 Controller::Controller()
 {
     int maxY = 0, maxX = 0;
     getmaxyx(stdscr, maxY, maxX);
     termRow = maxY;
     termCol = maxX;
-    speed = 1000;
+    speed = 1;
     state = "Loading";
     board = new Board(true, BOARD_HEIGHT - 2, BOARD_WIDTH - 2);
     //Create window for the board
@@ -110,6 +111,11 @@ void Controller::createNewBoard(std::string filename)
     board = new Board(filename);
 }
 
+void Controller::randomizeBoard()
+{
+    board->randomize();
+}
+
 int Controller::getTermRow()
 {
     return termRow;
@@ -138,7 +144,41 @@ void Controller::setState(std::string newState)
 
 void Controller::setSpeed(int newSpeed)
 {
-    speed = newSpeed;
+    /*scaling the increment depending on the size of the speed (to allow users
+    to scroll at a reasonable rate) */
+    if (speed >= 10000)
+    {
+        newSpeed *= 1000;
+    }
+
+    else if (speed >= 10000) {
+        newSpeed *= 1000;
+    }
+    else if (speed >= 1000)
+    {
+        newSpeed *= 100;
+    }
+    else if (speed >= 100)
+    {
+        newSpeed *= 10;
+    }
+    if (speed+newSpeed < 1)
+    {
+        speed = 1;
+        updateStatusWin();
+        return;
+    }
+    /*speed maximum is 1000 iterations/s equating to a delay of 1 ms
+    testing on my toaster laptop, the differences above this point appear
+    imperceptible, likely because the time it takes to display all of this
+    becomes significant*/
+    if (speed+newSpeed > 100000)
+    {
+        speed = 100000;
+        updateStatusWin();
+        return;
+    }
+    speed += newSpeed;
     updateStatusWin();
 }
 
@@ -152,7 +192,9 @@ void Controller::updateStatusWin()
     wprintw(statusWin, "\t");
     wprintw(statusWin, state.c_str());
     wprintw(statusWin, "\t");
-    wprintw(statusWin, "%.2f", speed/1000);
+    /*speed variable is in iterations/second... make sure it is presented that
+    way to the user (i.e. don't divide by 1000 or anything) */
+    wprintw(statusWin, "%.2f", speed);
     updateScreen();
 }
 
@@ -214,4 +256,33 @@ std::string Controller::getStringInput()
     del_panel(formPanel);
     updateScreen();
     return filename;
+}
+
+void Controller::printBoard()
+{
+    curs_set(TRUE);
+    WINDOW *win = panel_window(boardPanel);
+    for (int r = 0; r < board->getHeight(); r++)
+    {
+        std::string boardrow = "";
+        for (int c=0; c < board->getWidth(); c++)
+        {
+            if(board->getMatrix()[r][c])
+            {
+                boardrow += "X";
+            }
+            else
+            {
+                boardrow += "-";
+            }
+
+        }
+        mvwprintw(win, r+1, (termCol - board->getWidth())/2, boardrow.c_str());
+    }
+    show_panel(boardPanel);
+    updateScreen();
+}
+void Controller::runIteration()
+{
+    board->runIteration();
 }
