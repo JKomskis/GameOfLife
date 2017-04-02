@@ -1,9 +1,12 @@
 #include "Controller.h"
 #include <iostream>
+#include <stdlib.h>
+#include <ctime>
 
 int main()
 {
     //Setup
+	srand(time(0));
     initscr();
     cbreak();
     noecho();
