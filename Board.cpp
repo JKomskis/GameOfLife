@@ -16,13 +16,13 @@ Board::Board(bool wrap, int h, int w)
 {
 	this->height = h;
 	this->width = w;
-	
+
 	this->wrapAround = wrap;
-	
+
 	this->iterations = 0;
 	this->births = 0;
 	this->deaths = 0;
-	
+
 	matrix = new bool*[height];
 
 	for (int i = 0; i < height; i++)
@@ -53,12 +53,12 @@ Board::Board(string filename)
 
 	height = fs_atoi(in);
 	width = fs_atoi(in);
-	
+
 	wrapAround = fs_atoi(in);
 	iterations = fs_atoi(in);
 	births = fs_atoi(in);
 	deaths = fs_atoi(in);
-	
+
 	//initialize matrix
 	matrix = new bool*[height];
 	for (int i = 0; i < height; i++)
@@ -233,7 +233,7 @@ void Board::saveState(string fileName)
 	out << iterations << endl;
 	out << births << endl;
 	out << deaths << endl;
-	
+
 	for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
@@ -381,7 +381,7 @@ int main()
 	{
 		test.runIteration(100);
 	}
-	
+
     return 0;
 }
 */

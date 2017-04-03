@@ -31,11 +31,11 @@ Board * loadLife(string filename)
 		 if(width != 0 && (unsigned int)width != line.length())
 			throw "Error: Non-rectangular matrix";
 		 width = line.length();
-		 
+
 	}while(getline(in, line));
 	
 	in.close();
-	
+
 	// create & apply the data set
 	Board *ret = new Board(true, height, width);
 	for(int i = 0; i < width; i++)
@@ -44,8 +44,8 @@ Board * loadLife(string filename)
 				ret->toggle(i, j);
 
 	return ret;
-	
-	
+
+
 }
 
 Board * loadRLE(string filename)
@@ -58,8 +58,8 @@ Board * loadRLE(string filename)
 	string line;
 	//Board ret;
 	int width = 0, height = 0;
-	
-	
+
+
 	while (getline(in, line))
 		if (line.at(0) == '#')
 			continue;
@@ -79,14 +79,14 @@ Board * loadRLE(string filename)
 		for (int i = 0; i < (int)line.length(); i++)
 		{
 			char c = line.at(i);
-			
+
 			// handle RLE number
 			if ('0' <= c && c <= '9')
 			{
 				count = count * 10 + (c - '0');
 				continue;
 			}
-			
+
 			// handle newline / quit chars
 			if (c == '$')
 			{
@@ -98,11 +98,11 @@ Board * loadRLE(string filename)
 			{
 				break;
 			}
-			
+
 			// ok, actually print
 			if (count)
 			{
-				
+
 				for (int j = 0; j < count; j++)
 				{
 					if (c == 'o')
@@ -118,26 +118,26 @@ Board * loadRLE(string filename)
 				x++;
 			}
 		}
-		
+
 	}
-	
+
 	in.close();
-	
-	return ret;	
+
+	return ret;
 }
 
 Board * loadFormat(string filename)
-{	
+{
 	if      (endsWith(filename, ".life") ||
 			 endsWith(filename, ".lif"))
 		return loadLife(filename);
-		
+
 	else if (endsWith(filename, ".rle"))
 		return loadRLE(filename);
-		
+
 	else if (endsWith(filename, ".brd"))
 		return new Board(filename);
-		
+
 	else
 		throw "Unknown File Type";
 }
@@ -147,15 +147,15 @@ int main( int argc, char* args[] )
 	Board *test = load("formats/sample.life");
 	test->printBoard();
 	cout << endl;
-	
+
 	Board *rle = load("formats/sample1.rle");
 	rle->printBoard();
 	cout << endl;
-	
+
 	Board *rle2 = load("formats/sample2.rle");
 	rle2->printBoard();
 	cout << endl;
-	
+
 	return 0;
 }
 */

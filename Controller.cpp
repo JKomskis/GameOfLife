@@ -20,7 +20,6 @@ Controller::Controller()
     WINDOW *boardWin = newwin(BOARD_HEIGHT, BOARD_WIDTH, 0, 0);
     boardPanel = new_panel(boardWin);
     box(boardWin, 0, 0);
-    mvwprintw(boardWin, 1, 1, "+");
     //Create window for the bottom status area
     WINDOW *statusWin = newwin(termRow - BOARD_HEIGHT + 1, BOARD_WIDTH, BOARD_HEIGHT, 0);
     statusPanel = new_panel(statusWin);
@@ -189,7 +188,7 @@ void Controller::setSpeed(int newSpeed)
 void Controller::updateStatusWin()
 {
     WINDOW* statusWin = panel_window(statusPanel);
-    mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tBirths\tSpeed:");
+    mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tBirths:\tDeaths:\tSpeed:");
     mvwprintw(statusWin, 3, 1, "%d", board->getHeight());
     wprintw(statusWin, " x ");
     wprintw(statusWin, "%d", board->getWidth());
@@ -197,6 +196,8 @@ void Controller::updateStatusWin()
     wprintw(statusWin, state.c_str());
     wprintw(statusWin, "\t");
     wprintw(statusWin, "%d", board->getBirths());
+    wprintw(statusWin, "\t");
+    wprintw(statusWin, "%d", board->getDeaths());
     wprintw(statusWin, "\t");
     /*speed variable is in iterations/second... make sure it is presented that
     way to the user (i.e. don't divide by 1000 or anything) */
@@ -255,7 +256,7 @@ std::string Controller::getStringInput()
     std::string filename = field_buffer(field[0], 0);
     while(filename.back() == ' ')
 		filename.pop_back();
-    
+
     curs_set(FALSE);
     unpost_form(my_form);
 	free_form(my_form);
@@ -271,27 +272,148 @@ void Controller::printBoard()
 {
     curs_set(TRUE);
     WINDOW *win = panel_window(boardPanel);
+    wmove(win, 1, 1);
     for (int r = 0; r < board->getHeight(); r++)
     {
-        std::string boardrow = "";
+        //std::string boardrow = "";
         for (int c=0; c < board->getWidth(); c++)
         {
             if(board->getMatrix()[r][c])
             {
-                boardrow += "X";
+                waddch(win, ' '|A_REVERSE);
+                //boardrow += "X";
             }
             else
             {
-                boardrow += "-";
+                waddch(win, ' ');
+                //boardrow += " ";
             }
 
         }
-        mvwprintw(win, r+1, (termCol - board->getWidth())/2, boardrow.c_str());
+        wmove(win, r+2, 1);
+        //mvwprintw(win, r+1, (termCol - board->getWidth())/2, boardrow.c_str());
     }
     show_panel(boardPanel);
     updateScreen();
 }
+
 void Controller::runIteration()
 {
     board->runIteration();
+    updateStatusWin();
+}
+
+bool Controller::GetYesOrNo(std::string dialog)
+{
+    WINDOW *dialogWin = newwin(5, dialog.size() + 4, termRow / 2 - 3, termCol / 2 - (dialog.size() + 4) / 2);
+    keypad(dialogWin, TRUE);
+    PANEL *dialogPanel = new_panel(dialogWin);
+    box(dialogWin, 0, 0);
+    mvwprintw(dialogWin, 1, 2, dialog.c_str());
+    wattron(dialogWin, A_STANDOUT);
+    mvwprintw(dialogWin, 3, (dialog.size() + 4) / 4 - 1, "<Yes>");
+    wattroff(dialogWin, A_STANDOUT);
+    mvwprintw(dialogWin, 3, 3 * (dialog.size() + 4) / 4 - 1, "<No>");
+    show_panel(dialogPanel);
+    updateScreen();
+    bool yesSelected = true;
+    wchar_t ch;
+	while((ch = wgetch(dialogWin)) != 10)
+	{
+        switch(ch)
+	    {
+            case KEY_LEFT:
+			case KEY_RIGHT:
+                if(yesSelected)
+                {
+                    wattroff(dialogWin, A_STANDOUT);
+                    mvwprintw(dialogWin, 3, (dialog.size() + 4) / 4 - 1, "<Yes>");
+                    wattron(dialogWin, A_STANDOUT);
+                    mvwprintw(dialogWin, 3, 3 * (dialog.size() + 4) / 4 - 1, "<No>");
+                }
+                else
+                {
+                    wattron(dialogWin, A_STANDOUT);
+                    mvwprintw(dialogWin, 3, (dialog.size() + 4) / 4 - 1, "<Yes>");
+                    wattroff(dialogWin, A_STANDOUT);
+                    mvwprintw(dialogWin, 3, 3 * (dialog.size() + 4) / 4 - 1, "<No>");
+                }
+                yesSelected = !yesSelected;
+                break;
+		}
+        wrefresh(dialogWin);
+	}
+    return yesSelected;
+}
+
+void Controller::GetPatternDimensions(int &height, int &width)
+{
+    curs_set(TRUE);
+    FIELD *field[5];
+	int rows, cols;
+	field[0] = new_field(1, 8, 2, 0, 0, 0);
+    field[1] = new_field(1, 5, 2, 8, 0, 0);
+    field[2] = new_field(1, 7, 2, 15, 0, 0);
+    field[3] = new_field(1, 5, 2, 22, 0, 0);
+	field[4] = NULL;
+    field_opts_off(field[0], O_ACTIVE);
+    set_field_buffer(field[0], 0, "Height: ");
+	set_field_back(field[1], A_UNDERLINE);
+	field_opts_off(field[1], O_AUTOSKIP);
+    set_field_type(field[1], TYPE_INTEGER, 0, 1, 1000);
+    field_opts_off(field[2], O_ACTIVE);
+    set_field_buffer(field[2], 0, "Width: ");
+    set_field_back(field[3], A_UNDERLINE);
+	field_opts_off(field[3], O_AUTOSKIP);
+    set_field_type(field[3], TYPE_INTEGER, 0, 1, 1000);
+    FORM *form = new_form(field);
+    scale_form(form, &rows, &cols);
+    WINDOW *formWin = newwin(rows + 4, cols + 4, termRow / 2 - (rows + 4) / 2, termCol / 2 - cols / 2);
+    PANEL *formPanel = new_panel(formWin);
+    keypad(formWin, TRUE);
+    set_form_win(form, formWin);
+    WINDOW* subFormWin = derwin(formWin, rows, cols, 2, 2);
+    set_form_sub(form, subFormWin);
+    box(formWin, 0, 0);
+    printCenter(formWin, "Enter pattern dimensions:", 1, cols + 4);
+    post_form(form);
+    show_panel(formPanel);
+    updateScreen();
+    int heightInput = 0, widthInput = 0;
+    wchar_t ch;
+    /* Loop through to get user requests */
+    while((ch = wgetch(formWin)))
+    {
+        switch(ch)
+        {
+            case KEY_LEFT:
+                form_driver(form, REQ_PREV_FIELD);
+                break;
+            case KEY_RIGHT:
+                form_driver(form, REQ_NEXT_FIELD);
+                break;
+            case KEY_BACKSPACE:
+                form_driver(form, REQ_PREV_CHAR);
+                form_driver(form, REQ_DEL_CHAR);
+                break;
+            case KEY_DC:
+                form_driver(form, REQ_DEL_CHAR);
+                break;
+            case 10:
+                form_driver(form, REQ_VALIDATION);
+                heightInput = atoi( field_buffer(field[1], 0) );
+                widthInput = atoi( field_buffer(field[3], 0) );
+                if(heightInput != 0 && widthInput != 0 )
+                {
+                    height = heightInput;
+                    width = widthInput;
+                    return;
+                }
+                break;
+            default:
+                form_driver(form, ch);
+                break;
+        }
+    }
+    curs_set(FALSE);
 }

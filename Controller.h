@@ -25,7 +25,9 @@ class Controller
         void createNewBoard(bool wrapAround);
         void createNewBoard(std::string filename);
         void randomizeBoard();
+        bool GetYesOrNo(std::string dialog);
         int getMainMenuChoice();
+        void GetPatternDimensions(int &height, int &width);
         int getSpeed();
         std::string getState();
         std::string getStringInput();
@@ -38,8 +40,6 @@ class Controller
         void setSpeed(int newSpeed);
         void updateScreen();
         void updateStatusWin();
-
-
         void printBoard();
         void runIteration();
 };
