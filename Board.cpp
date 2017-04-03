@@ -2,11 +2,13 @@
 //
 //This is a test
 
-#include <string>
 #include <iostream>
-#include "board.h"
 #include <fstream>
+#include <string>
 #include <stdlib.h>
+#include "Board.h"
+//#include "Formats.h"
+#include "Util.h"
 
 using namespace std;
 
@@ -14,8 +16,13 @@ Board::Board(bool wrap, int h, int w)
 {
 	this->height = h;
 	this->width = w;
+	
 	this->wrapAround = wrap;
-
+	
+	this->iterations = 0;
+	this->births = 0;
+	this->deaths = 0;
+	
 	matrix = new bool*[height];
 
 	for (int i = 0; i < height; i++)
@@ -34,9 +41,6 @@ Board::Board(bool wrap, int h, int w)
 
 Board::Board(string filename)
 {
-
-	wrapAround = false; //need to decide how to determine this from file
-
 	ifstream in;
 	in.open(filename.c_str());
 
@@ -47,12 +51,14 @@ Board::Board(string filename)
 
 	string line;
 
-	getline(in, line);
-	height = atoi(line.c_str());
-
-	getline(in, line);
-	width = atoi(line.c_str());
-
+	height = fs_atoi(in);
+	width = fs_atoi(in);
+	
+	wrapAround = fs_atoi(in);
+	iterations = fs_atoi(in);
+	births = fs_atoi(in);
+	deaths = fs_atoi(in);
+	
 	//initialize matrix
 	matrix = new bool*[height];
 	for (int i = 0; i < height; i++)
@@ -83,9 +89,9 @@ void Board::toggle(int r, int c)	//toggles the cell from true to false or false 
 
 void Board::randomize()
 {
-	for (int r = 0; r < getHeight(); r++)
+	for (int r = 0; r < height; r++)
 	{
-		for (int c = 0; c < getWidth(); c++)
+		for (int c = 0; c < width; c++)
 		{
 			if (std::rand() % 2) {
 				toggle(r, c);
@@ -159,11 +165,13 @@ void Board::runIteration()
 				if(nMatrix[r][c] < 2)	//Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
 				{
 					toggle(r, c);
+					deaths++;
 					//std::cout << "For " << r << ", " << c << " we changed it to a 0 because we had <2: " << nMatrix[r][c] <<endl;
 				}
 				else if(nMatrix[r][c] > 3)	//Any live cell with more than three live neighbours dies, as if by overpopulation.
 				{
 					toggle(r, c);
+					deaths++;
 					//std::cout << "For " << r << ", " << c << " we changed it to a 0 because we had >3: " << nMatrix[r][c] << endl;
 				}
 				//if neither of these is true, the cell stays alive
@@ -173,11 +181,13 @@ void Board::runIteration()
 				if(nMatrix[r][c] == 3)	//Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 				{
 					toggle(r, c);
+					births++;
 					//std::cout << "For " << r << ", " << c << " we changed it to a 1 because we had ==3: " << nMatrix[r][c] << endl;
 				}
 			}
 		}
 	}
+	iterations++;
 
 }
 
@@ -186,15 +196,19 @@ void Board::runIteration(int runs)	//runs the interation the correct number of t
 	for(int i = 0; i < runs; i++)
 	{
 		runIteration();
-		std::cout << "This is the matrix after " << i + 1 << " iterations.\n";
-		getMatrix();
-		cout << endl;
+		//std::cout << "This is the matrix after " << i + 1 << " iterations.\n";
+		//getMatrix();
+		//cout << endl;
 	}
 }
 
 bool** Board::getMatrix()
 {
-	/*
+	return this->matrix;
+}
+
+void Board::printBoard()
+{
 	for(int i = 0; i < height; i++)
 	{
 		for(int j = 0; j < width; j++)
@@ -203,17 +217,18 @@ bool** Board::getMatrix()
 		}
 		cout << endl;
 	}
-	*/
-
-	return this->matrix;
 }
 
 void Board::saveState(string fileName)
 {
 	ofstream out(fileName.c_str());
-	out << height << "\n";	//first line tells the program the height of the saved matrix
-	out << width << "\n";	//second line tells the program the width of the saved matrix
-
+	out << height << endl;	//first line tells the program the height of the saved matrix
+	out << width << endl;	//second line tells the program the width of the saved matrix
+	out << wrapAround << endl;
+	out << iterations << endl;
+	out << births << endl;
+	out << deaths << endl;
+	
 	for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
@@ -239,11 +254,9 @@ void Board::addPattern(string fileName, int x, int y)
 	int widthOfSaved = 0;
 	string line;
 
-	getline(in, line);					//read out the heightOfSaved
-	heightOfSaved = atoi(line.c_str());	//make it an int
-	getline(in, line);					//read out the widthOfSaved
-	widthOfSaved = atoi(line.c_str());	//make it an int
-
+	heightOfSaved = fs_atoi(in);
+	widthOfSaved = fs_atoi(in);
+	cout << heightOfSaved << endl;
 	//initialize new patternMatrix
 	bool **patternMatrix = new bool *[heightOfSaved];
 	for(int i = 0; i < heightOfSaved; i++)
@@ -253,25 +266,23 @@ void Board::addPattern(string fileName, int x, int y)
 
 	//store file values into the patternMatrix
 	int row = 0;
-	string a = "";
 	while(getline(in, line))
 	{
 		for(int i = 0; i <widthOfSaved; i++)
 		{
-			a = line[i];
-			patternMatrix[row][i] = atoi(a.c_str());
+			patternMatrix[row][i] = line.at(i) == '1';
 		}
 		row++;
 	}
-
+	// 4/3/17 - JJK - Bad logic here - now fixed
 	//check if the pattern will fit in the pattern matrix
-	if(heightOfSaved <= height || widthOfSaved <= width)
+	if((heightOfSaved + y) > height || (widthOfSaved + x) > width)
 	{
 		cerr << "Saved Pattern is larger than board" << endl;
 	}
 
 	//now place patternMatrix in matrix
-	int countX = 0;
+	/*int countX = 0;
 	int countY = 0;
 	for(int i = y; i < y + heightOfSaved; i++)
 	{
@@ -282,8 +293,11 @@ void Board::addPattern(string fileName, int x, int y)
 		}
 		countX++;
 		countY = 0;
-	}
+	}*/
 
+	for(int i = 0; i < heightOfSaved; i++)
+		for(int j = 0; j < widthOfSaved; j++)
+			matrix[x+i][y+j] = patternMatrix[i][j];
 	in.close();
 
 }
@@ -297,6 +311,22 @@ int Board::getWidth()
 {
 	return width;
 }
+
+int Board::getIterations()
+{
+	return iterations;
+}
+
+int Board::getBirths()
+{
+	return this->births;
+}
+
+int Board::getDeaths()
+{
+	return deaths;
+}
+
 /*
 int main()
 {
@@ -310,35 +340,36 @@ int main()
 	cout << "Width of board: ";
 	cin >> width;
 
-	std::cout << "Add a board called test\n";
+	cout << "Add a board called test\n";
 	Board test(false, height, width);
 
-	std::cout << "Print out the matrix:\n";
-	test.getMatrix();
+	cout << "Print out the matrix:\n";
+	test.printBoard();
 	cout << endl;
 
-	std::cout << "Add a pattern called patterntest.txt and then print out the matrix\n";
+	cout << "Add a pattern called patterntest.txt and then print out the matrix\n";
 	test.addPattern("patterntest.txt", 1, 1);
-	test.getMatrix();
+	test.printBoard();
 	cout << endl;
 
 	//test.getMatrix();
 	//cout << endl;
 
-	std::cout << "Try running the runIteration function: \n";
+	cout << "Try running the runIteration function: \n";
 	test.runIteration();
 
-	std::cout << "This is the matrix now\n";
-	test.getMatrix();
+	cout << "This is the matrix now\n";
+	test.printBoard();
 	cout << endl;
 
 	test.runIteration(3);
-	std::cout << "This is the matrix after 3 runIterations\n";
-	test.getMatrix();
+	cout << "This is the matrix after 3 runIterations\n";
+	test.printBoard();
 	cout << endl;
 
-	test.randomize(1);
-	test.getMatrix();
+	cout << "Random Board\n";
+	test.randomize();
+	test.printBoard();
 	cout << endl;
 
     return 0;

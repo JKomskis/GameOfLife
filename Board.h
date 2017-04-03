@@ -12,9 +12,14 @@ class Board{
 private:
 
 	bool ** matrix;
-	bool wrapAround;
 	int height;
 	int width;
+	
+	bool wrapAround;
+	
+	int iterations;
+	int births;
+	int deaths;
 	//std::string fileName;	<--Do we need this in here????????
 
 public:
@@ -26,12 +31,16 @@ public:
 	void runIteration();
 	void runIteration(int runs);
 	void addPattern(string fileName, int x, int y);
-	bool ** getMatrix();
+	void printBoard();
 	void saveState(string fileName);
-	int getHeight();
-	int getWidth();
+	bool ** getMatrix();
 	int numNeigh(int r, int c);
 	int countNeigh(int r, int c);
+	int getHeight();
+	int getWidth();
+	int getIterations();
+	int getBirths();
+	int getDeaths();
 
 };
 

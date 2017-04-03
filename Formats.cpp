@@ -1,12 +1,12 @@
-#include "Formats.h"
-
-#include <string>
 #include <iostream>
-#include "Board.cpp"
 #include <fstream>
+#include <string>
 #include <stdlib.h>
+#include "Board.h"
+#include "Formats.h"
+#include "Util.h"
 
-Board loadLife105(string filename)
+Board * loadLife(string filename)
 {
 	ifstream in;
 	in.open(filename.c_str());
@@ -14,7 +14,6 @@ Board loadLife105(string filename)
 	if (!in.is_open())
 		throw "Error Opening File";
 	string line;
-
 	// check the header
 	getline(in, line);
 	if (line.compare("#Life 1.05"))
@@ -29,25 +28,27 @@ Board loadLife105(string filename)
 	do
 	{
 		 boardLines[height++] = line;
-		 if(width != 0 && width != line.length())
+		 if(width != 0 && (unsigned int)width != line.length())
 			throw "Error: Non-rectangular matrix";
 		 width = line.length();
 		 
 	}while(getline(in, line));
 	
+	in.close();
+	
 	// create & apply the data set
-	Board ret(false, height, width);
+	Board *ret = new Board(false, height, width);
 	for(int i = 0; i < width; i++)
 		for(int j = 0; j < height; j++)
 			if(boardLines[i].at(j) == '*')
-				ret.toggle(j, i);
+				ret->toggle(i, j);
 
 	return ret;
 	
 	
 }
 
-Board loadRLE(string filename)
+Board * loadRLE(string filename)
 {
 	ifstream in;
 	in.open(filename.c_str());
@@ -65,9 +66,15 @@ Board loadRLE(string filename)
 		else
 			break;
 	// handle first line
-	sscanf(line.c_str(), "x = %d, y = %d", &width, &height);
-	
-	Board ret(false, height, width);
+	char discard[100];
+	if(sscanf(line.c_str(), "x = %d, y = %d", &width, &height))
+		;
+	else if(sscanf(line.c_str(), "x = %d, y = %d,%s", &width, &height, (char*)&discard))
+		;
+	else
+		throw "Invalid Header";
+	cout << width  << endl << height << endl;
+	Board *ret = new Board(false, height, width);
 	int x=0, y=0;
 	while (getline(in, line))
 	{
@@ -75,7 +82,7 @@ Board loadRLE(string filename)
 			continue;
 		//cout << "LINE: " << line << endl;
 		int count = 0;
-		for (int i = 0; i < line.length(); i++)
+		for (int i = 0; i < (int)line.length(); i++)
 		{
 			char c = line.at(i);
 			
@@ -97,6 +104,7 @@ Board loadRLE(string filename)
 			{
 				break;
 			}
+			
 			// ok, actually print
 			if (count)
 			{
@@ -104,7 +112,7 @@ Board loadRLE(string filename)
 				for (int j = 0; j < count; j++)
 				{
 					if (c == 'o')
-						ret.toggle(x, y);//cout << c; //cout << "IN WHILE: " << c << endl;
+						ret->toggle(y, x);
 					x++;
 				}
 				count = 0;
@@ -112,31 +120,47 @@ Board loadRLE(string filename)
 			else
 			{
 				if (c == 'o')
-					ret.toggle(x, y);
+					ret->toggle(y, x);
 				x++;
 			}
 		}
 		
 	}
 	
-	return ret;
+	in.close();
 	
-	
+	return ret;	
+}
+
+Board * load(string filename)
+{	
+	if      (endsWith(filename, ".life") ||
+			 endsWith(filename, ".lif"))
+		return loadLife(filename);
+		
+	else if (endsWith(filename, ".rle"))
+		return loadRLE(filename);
+		
+	else if (endsWith(filename, ".brd"))
+		return new Board(filename);
+		
+	else
+		throw "Unknown File Type";
 }
 
 int main( int argc, char* args[] )
 {
-	string filename = "formats/life105";
-	Board test = loadLife105(filename);
-	test.getMatrix();
+	Board *test = load("formats/sample.life");
+	test->printBoard();
 	cout << endl;
 	
-	Board rle = loadRLE("formats/rle");
-	rle.getMatrix();
-	cout << endl;
+	//~ Board rle = loadFormat("formats/sample1.rle");
+	//~ rle.printBoard();
+	//~ cout << endl;
 	
-	Board rle2 = loadRLE("formats/rle2");
-	rle2.getMatrix();
-	cout << endl;
+	//~ Board rle2 = loadFormat("formats/sample2.rle");
+	//~ rle2.printBoard();
+	//~ cout << endl;
+	
 	return 0;
 }

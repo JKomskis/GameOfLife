@@ -78,14 +78,17 @@ int Controller::getMainMenuChoice()
     wchar_t ch;
 	while((ch = wgetch(my_menu_win)) != 10)
 	{       switch(ch)
-	        {	case KEY_DOWN:
-				menu_driver(my_menu, REQ_DOWN_ITEM);
-				break;
-			case KEY_UP:
-				menu_driver(my_menu, REQ_UP_ITEM);
-				break;
-		}
-                wrefresh(my_menu_win);
+	        {
+				case KEY_DOWN:
+					menu_driver(my_menu, REQ_DOWN_ITEM);
+					break;
+				case KEY_UP:
+					menu_driver(my_menu, REQ_UP_ITEM);
+					break;
+				default:
+					break;
+			}
+            wrefresh(my_menu_win);
 	}
 
 	/* Unpost and free all the memory taken up */
@@ -185,12 +188,14 @@ void Controller::setSpeed(int newSpeed)
 void Controller::updateStatusWin()
 {
     WINDOW* statusWin = panel_window(statusPanel);
-    mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tSpeed:");
+    mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tBirths\tSpeed:");
     mvwprintw(statusWin, 3, 1, "%d", board->getHeight());
     wprintw(statusWin, " x ");
     wprintw(statusWin, "%d", board->getWidth());
     wprintw(statusWin, "\t");
     wprintw(statusWin, state.c_str());
+    wprintw(statusWin, "\t");
+    wprintw(statusWin, "%d", board->getBirths());
     wprintw(statusWin, "\t");
     /*speed variable is in iterations/second... make sure it is presented that
     way to the user (i.e. don't divide by 1000 or anything) */

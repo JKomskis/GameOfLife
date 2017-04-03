@@ -3,7 +3,7 @@
 #include <form.h>
 #include <menu.h>
 #include <string>
-#include "board.h"
+#include "Board.h"
 
 class Controller
 {
