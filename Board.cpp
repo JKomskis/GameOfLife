@@ -187,6 +187,11 @@ void Board::runIteration()
 			}
 		}
 	}
+	for (int i = 0; i < height; i++)
+	{
+		delete nMatrix[i];
+	}
+	delete nMatrix;
 	iterations++;
 
 }
@@ -372,6 +377,11 @@ int main()
 	test.printBoard();
 	cout << endl;
 
+	while (true)
+	{
+		test.runIteration(100);
+	}
+	
     return 0;
 }
 */

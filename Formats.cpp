@@ -37,7 +37,7 @@ Board * loadLife(string filename)
 	in.close();
 	
 	// create & apply the data set
-	Board *ret = new Board(false, height, width);
+	Board *ret = new Board(true, height, width);
 	for(int i = 0; i < width; i++)
 		for(int j = 0; j < height; j++)
 			if(boardLines[i].at(j) == '*')
@@ -68,7 +68,7 @@ Board * loadRLE(string filename)
 	// handle first line
 	sscanf(line.c_str(), "x = %d, y = %d%*s", &width, &height);
 
-	Board *ret = new Board(false, height, width);
+	Board *ret = new Board(true, height, width);
 	int x=0, y=0;
 	while (getline(in, line))
 	{
