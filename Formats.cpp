@@ -66,14 +66,8 @@ Board * loadRLE(string filename)
 		else
 			break;
 	// handle first line
-	char discard[100];
-	if(sscanf(line.c_str(), "x = %d, y = %d", &width, &height))
-		;
-	else if(sscanf(line.c_str(), "x = %d, y = %d,%s", &width, &height, (char*)&discard))
-		;
-	else
-		throw "Invalid Header";
-	cout << width  << endl << height << endl;
+	sscanf(line.c_str(), "x = %d, y = %d%*s", &width, &height);
+
 	Board *ret = new Board(false, height, width);
 	int x=0, y=0;
 	while (getline(in, line))
@@ -132,7 +126,7 @@ Board * loadRLE(string filename)
 	return ret;	
 }
 
-Board * load(string filename)
+Board * loadFormat(string filename)
 {	
 	if      (endsWith(filename, ".life") ||
 			 endsWith(filename, ".lif"))
@@ -147,20 +141,21 @@ Board * load(string filename)
 	else
 		throw "Unknown File Type";
 }
-
+/*
 int main( int argc, char* args[] )
 {
 	Board *test = load("formats/sample.life");
 	test->printBoard();
 	cout << endl;
 	
-	//~ Board rle = loadFormat("formats/sample1.rle");
-	//~ rle.printBoard();
-	//~ cout << endl;
+	Board *rle = load("formats/sample1.rle");
+	rle->printBoard();
+	cout << endl;
 	
-	//~ Board rle2 = loadFormat("formats/sample2.rle");
-	//~ rle2.printBoard();
-	//~ cout << endl;
+	Board *rle2 = load("formats/sample2.rle");
+	rle2->printBoard();
+	cout << endl;
 	
 	return 0;
 }
+*/

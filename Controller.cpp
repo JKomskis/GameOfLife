@@ -6,6 +6,7 @@
 #define BOARD_WIDTH termCol
 
 #include <iostream>
+
 Controller::Controller()
 {
     int maxY = 0, maxX = 0;
@@ -111,7 +112,7 @@ void Controller::createNewBoard(bool wrapAround)
 void Controller::createNewBoard(std::string filename)
 {
     delete board;
-    board = new Board(filename);
+    board = loadFormat(filename);
 }
 
 void Controller::randomizeBoard()
@@ -252,6 +253,9 @@ std::string Controller::getStringInput()
 	}
     form_driver(my_form, REQ_VALIDATION);
     std::string filename = field_buffer(field[0], 0);
+    while(filename.back() == ' ')
+		filename.pop_back();
+    
     curs_set(FALSE);
     unpost_form(my_form);
 	free_form(my_form);

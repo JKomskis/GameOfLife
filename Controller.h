@@ -4,6 +4,7 @@
 #include <menu.h>
 #include <string>
 #include "Board.h"
+#include "Formats.h"
 
 class Controller
 {
