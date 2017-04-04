@@ -1,0 +1,21 @@
+#N Fireship synthesis
+#O Nico Brown
+#C A 30-glider synthesis of the C/10 fireship spaceship
+#C http://www.conwaylife.com/wiki/Fireship
+#C http://conwaylife.com/patterns/fireship_synth.rle
+x = 208, y = 68, rule = B3/S23
+8$88bo$88bobo71bobo32bobo$88b2o73b2o32b2o$73bobo87bo34bo$69bo4b2o$69b
+2o3bo$68bobo$76bo85bo36bo$76bobo84bo34bo$76b2o83b3o34b3o$6bobo8bobo$7b
+2o8b2o$7bo10bo78b2o2b2o15b2o2b2o14b2o2b2o34b2o2b2o$97b2o2b2o15b2o2b2o
+14b2o2b2o34b2o2b2o3$42b2o4b2o22b2o4b2o16b2o4b2o13b2o4b2o12b2o4b2o32b2o
+4b2o$10b2o2b2o26bobo2bobo22bobo2bobo16bobo2bobo13bobo2bobo12bobo2bobo
+32bobo2bobo$9bobo2bobo27bo2bo26bo2bo20bo2bo17bo2bo16bo2bo36bo2bo$11bo
+2bo28bo4bo24bo4bo18bo4bo15bo4bo14bo4bo34bo4bo$43bo4bo24bo4bo18bo4bo15b
+o4bo14bo4bo34bo4bo$43bo4bo24bo4bo18bo4bo15bo4bo14bo4bo34bo4bo$45b2o28b
+2o22b2o19b2o18b2o38b2o3$45b2o$7b3o6b3o26b2o$9bo6bo$8bo8bo57b2o22b2o19b
+2o18b2o38b2o$75b2o22b2o19b2o18b2o20b2o16b2o16b2o$161bobo34bobo$123b2o
+12b2o4b2o18bo13b2o4b2o13bo$122bo2bo10bo2bo2bo2bo30bo2bo2bo2bo$41b3o60b
+2o9b2o6b2o12b2o4b2o32b2o4b2o$43bo60bobo7bobo$42bo12bo48bo11bo49bo13b2o
+13bo$54b2o43b2o19b2o44b2o12b2o12b2o$54bobo41bobo19bobo19b2o15b3o3bobo
+26bobo3b3o$100bo19bo21bobo16bo38bo$142bo17bo40bo$136b2o$135bobo$137bo
+8$164b2o30b2o$165b2o28b2o$164bo32bo!
