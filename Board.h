@@ -27,7 +27,7 @@ public:
 	Board(bool wrapAround, int height, int width);
 	Board(string filename);
 	void toggle(int x, int y);
-	void randomize();
+	void randomize(double ratio);
 	void runIteration();
 	void runIteration(int runs);
 	void addPattern(string fileName, int x, int y);

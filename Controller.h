@@ -17,7 +17,7 @@ class Controller
     /*Speed is the frequency of iterations, in iterations/s.
     The system processes this as the period of iterations, or the delay between
     iterations (in ms).*/
-    double speed;
+    int speed;
     std::string state;
 
     public:
@@ -25,7 +25,7 @@ class Controller
         void createNewBoard(bool wrapAround);
         void createNewBoard(std::string filename);
         bool EditMode();
-        void randomizeBoard();
+        void randomizeBoard(double ratio);
         WINDOW* GetBoardWindow();
         bool GetYesOrNo(std::string dialog);
         int getMainMenuChoice();
