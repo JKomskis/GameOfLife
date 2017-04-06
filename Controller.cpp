@@ -137,9 +137,9 @@ void Controller::createNewBoard(std::string filename)
     updateScreen();
 }
 
-void Controller::randomizeBoard()
+void Controller::randomizeBoard(double ratio)
 {
-    board->randomize();
+    board->randomize(ratio);
 }
 
 int Controller::getTermRow()

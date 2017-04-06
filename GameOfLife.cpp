@@ -35,7 +35,7 @@ void MainMenu(Controller *controller)
 			//Load a random board
 			wrapAround = controller->GetYesOrNo("Would you like to enable wrap around?");
 			controller->createNewBoard(wrapAround);
-			controller->randomizeBoard();
+			controller->randomizeBoard(0.15);
 			break;
 		case 3:
 			//Load the pattern editor

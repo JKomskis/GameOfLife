@@ -25,7 +25,7 @@ class Controller
         void createNewBoard(bool wrapAround);
         void createNewBoard(std::string filename);
         bool EditMode();
-        void randomizeBoard();
+        void randomizeBoard(double ratio);
         WINDOW* GetBoardWindow();
         bool GetYesOrNo(std::string dialog);
         int getMainMenuChoice();

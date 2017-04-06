@@ -87,13 +87,15 @@ void Board::toggle(int r, int c)	//toggles the cell from true to false or false 
 	matrix[r][c] = !matrix[r][c];
 }
 
-void Board::randomize()
+void Board::randomize(double ratio)
 {
+	ratio = (ratio < 0) ? 0 : ratio;
+	ratio = (ratio > 1) ? 1 : ratio;
 	for (int r = 0; r < height; r++)
 	{
 		for (int c = 0; c < width; c++)
 		{
-			if (std::rand() % 2) {
+			if (((double)std::rand()/RAND_MAX) <= ratio) {
 				toggle(r, c);
 			}
 		}
