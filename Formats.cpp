@@ -33,7 +33,7 @@ Board * loadLife(string filename)
 		 width = line.length();
 
 	}while(getline(in, line));
-	
+
 	in.close();
 
 	// create & apply the data set

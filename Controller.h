@@ -17,7 +17,7 @@ class Controller
     /*Speed is the frequency of iterations, in iterations/s.
     The system processes this as the period of iterations, or the delay between
     iterations (in ms).*/
-    double speed;
+    int speed;
     std::string state;
 
     public:

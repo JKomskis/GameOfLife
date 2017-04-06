@@ -2,11 +2,13 @@
 #include <iostream>
 #include <stdlib.h>
 #include <ctime>
+#include <exception>
 
 void MainMenu(Controller *controller)
 {
 	std::string filename = "";
 	bool wrapAround = true;
+	bool isFileValid = false;
 	switch( controller->getMainMenuChoice() )
 	{
 		case 0:
@@ -16,8 +18,18 @@ void MainMenu(Controller *controller)
 			break;
 		case 1:
 			//Load a saved board
-			filename = controller->getStringInput();
-			controller->createNewBoard(filename);
+			while(!isFileValid)
+			{
+				filename = controller->getStringInput();
+				try
+				{
+					controller->createNewBoard(filename);
+				}catch(char const*)
+				{
+					continue;
+				}
+				isFileValid = true;
+			}
 			break;
 		case 2:
 			//Load a random board

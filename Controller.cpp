@@ -101,6 +101,10 @@ void Controller::createNewBoard(bool wrapAround)
     delete board;
     wclear(panel_window(boardPanel));
     wclear(panel_window(statusPanel));
+    /*delwin(panel_window(boardPanel));
+    del_panel(boardPanel);
+    delwin(panel_window(statusPanel));
+    del_panel(statusPanel);*/
     board = new Board(wrapAround, BOARD_HEIGHT - 2, BOARD_WIDTH - 2);
     //Create window for the board
     WINDOW *boardWin = newwin(BOARD_HEIGHT, BOARD_WIDTH, 0, 0);
@@ -207,8 +211,10 @@ void Controller::setSpeed(int newSpeed)
 void Controller::updateStatusWin()
 {
     WINDOW* statusWin = panel_window(statusPanel);
+    werase(statusWin);
+    box(statusWin, 0, 0);
     mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tIterations:\tBirths:\tDeaths:\tSpeed:");
-    mvwprintw(statusWin, 3, 1, "%d", board->getHeight());
+    mvwprintw(statusWin, 3, 1, "%02d", board->getHeight());
     wprintw(statusWin, " x ");
     wprintw(statusWin, "%d", board->getWidth());
     wprintw(statusWin, "\t");
@@ -222,7 +228,7 @@ void Controller::updateStatusWin()
     wprintw(statusWin, "\t");
     /*speed variable is in iterations/second... make sure it is presented that
     way to the user (i.e. don't divide by 1000 or anything) */
-    wprintw(statusWin, "%.2f", speed);
+    wprintw(statusWin, "%d", speed);
     updateScreen();
 }
 
