@@ -190,13 +190,15 @@ void Controller::setSpeed(int newSpeed)
 void Controller::updateStatusWin()
 {
     WINDOW* statusWin = panel_window(statusPanel);
-    mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tBirths:\tDeaths:\tSpeed:");
+    mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tIterations:\tBirths:\tDeaths:\tSpeed:");
     mvwprintw(statusWin, 3, 1, "%d", board->getHeight());
     wprintw(statusWin, " x ");
     wprintw(statusWin, "%d", board->getWidth());
     wprintw(statusWin, "\t");
     wprintw(statusWin, state.c_str());
     wprintw(statusWin, "\t");
+    wprintw(statusWin, "%d", board->getIterations());
+    wprintw(statusWin, "\t\t");
     wprintw(statusWin, "%d", board->getBirths());
     wprintw(statusWin, "\t");
     wprintw(statusWin, "%d", board->getDeaths());
