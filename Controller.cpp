@@ -17,7 +17,7 @@ Controller::Controller()
     termCol = maxX;
     speed = 1;
     state = "Loading";
-    board = new Board(true, BOARD_HEIGHT - 2, BOARD_WIDTH - 2);
+    board = new Board(false, BOARD_HEIGHT - 2, BOARD_WIDTH - 2);
     //Create window for the board
     WINDOW *boardWin = newwin(BOARD_HEIGHT, BOARD_WIDTH, 0, 0);
     boardPanel = new_panel(boardWin);
@@ -112,8 +112,11 @@ void Controller::createNewBoard(bool wrapAround)
 
 void Controller::createNewBoard(std::string filename)
 {
-    delete board;
-    board = loadFormat(filename);
+    Board *temp = loadFormat(filename);
+    int x_offset = (board->getWidth() - temp->getWidth())/2;
+    int y_offset = (board->getHeight() - temp->getHeight())/2;
+    board->addPattern(temp, x_offset, y_offset);
+    delete temp;
 }
 
 void Controller::randomizeBoard()
