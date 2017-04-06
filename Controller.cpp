@@ -439,7 +439,7 @@ void Controller::GetPatternDimensions(int &height, int &width)
     curs_set(FALSE);
 }
 
-void Controller::EditMode()
+bool Controller::EditMode()
 {
     WINDOW* boardWin = panel_window(boardPanel);
     keypad(boardWin, TRUE);
@@ -520,6 +520,20 @@ void Controller::EditMode()
                 waddch(boardWin, winch(boardWin)|A_STANDOUT);
                 wmove(boardWin, y, x);
                 break;
+            case '[':
+                setSpeed(-1);
+                break;
+            case ']':
+                setSpeed(1);
+                break;
+            case 10:
+                runIteration();
+                printBoard();
+                break;
+            case 27:
+                return true;
+                break;
         }
 	}
+    return false;
 }

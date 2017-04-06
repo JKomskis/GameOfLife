@@ -53,7 +53,6 @@ int main()
     while(controller->getState() == "Paused" || (input = getch()))
     {
         //std::cout << "Iteration count: " << ++count << std::endl;
-
 		if(input == '[')
         {
             controller->setSpeed(-1);
@@ -71,7 +70,10 @@ int main()
         {
             timeout(-1);
             controller->setState("Paused");
-			controller->EditMode();
+			if(controller->EditMode())
+			{
+				MainMenu(controller);
+			}
 			controller->setState("Running");
         }
 		else if(input == 27)
@@ -79,7 +81,7 @@ int main()
 			MainMenu(controller);
 		}
         //&& is used for an "advance one iteration" when paused
-        if(controller->getState() == "Paused" && input != ' ')
+        if(controller->getState() == "Paused")
             continue;
         timeout(1.0/controller->getSpeed() * 1000);
         for (int i = 1; (controller->getSpeed() > 1000) && (i < controller->getSpeed() / 1000); i++) {
