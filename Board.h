@@ -14,9 +14,9 @@ private:
 	bool ** matrix;
 	int height;
 	int width;
-	
+
 	bool wrapAround;
-	
+
 	int iterations;
 	int births;
 	int deaths;

@@ -12,4 +12,3 @@ Board * loadLife(string filename);
 Board * loadRLE(string filename);
 Board * loadFormat(string filename);
 #endif /* FORMATS_H_ */
-

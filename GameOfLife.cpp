@@ -38,14 +38,14 @@ int main()
             break;
     }
     controller->setState("Paused");
-    wchar_t input;
-    std::cout << "Printing board." << std::endl;
+    wchar_t input = 'a';
+    //std::cout << "Printing board." << std::endl;
     controller->printBoard();
     controller->updateScreen();
     int count = 0;
     while((input = getch()) != 27)
     {
-        std::cout << "Iteration count: " << ++count << std::endl;
+        //std::cout << "Iteration count: " << ++count << std::endl;
 
         if(input == '[')
         {
@@ -60,26 +60,17 @@ int main()
             controller->setSpeed(1);
             continue;
         }
-        if(input == 'p')
+        if(input == 'p' || controller->getState() == "Paused")
         {
-            if(controller->getState() == "Paused")
-            {
-                controller->setState("Running");
-            }
-            else
-            {
-                timeout(-1);
-                controller->setState("Paused");
-            }
+            timeout(-1);
+            controller->setState("Paused");
+			controller->EditMode();
+			controller->setState("Running");
         }
         //&& is used for an "advance one iteration" when paused
         if(controller->getState() == "Paused" && input != ' ')
             continue;
         timeout(1.0/controller->getSpeed() * 1000);
-        /*if( mvwinch(boardWin, 1, 1) == '+')
-            mvwprintw(boardWin, 1, 1, "-");
-        else
-            mvwprintw(boardWin, 1, 1, "+");*/
         for (int i = 1; (controller->getSpeed() > 1000) && (i < controller->getSpeed() / 1000); i++) {
             controller-> runIteration();
             count++;

@@ -2,8 +2,10 @@
 
 #define MAIN_MENU_HEIGHT 7
 #define MAIN_MENU_WIDTH 28
-#define BOARD_HEIGHT termRow * .9
+#define BOARD_HEIGHT (termRow - STATUS_HEIGHT)
 #define BOARD_WIDTH termCol
+#define STATUS_HEIGHT 5
+#define STATUS_WIDTH termCol
 
 #include <iostream>
 
@@ -21,7 +23,7 @@ Controller::Controller()
     boardPanel = new_panel(boardWin);
     box(boardWin, 0, 0);
     //Create window for the bottom status area
-    WINDOW *statusWin = newwin(termRow - BOARD_HEIGHT + 1, BOARD_WIDTH, BOARD_HEIGHT, 0);
+    WINDOW *statusWin = newwin(STATUS_HEIGHT, STATUS_WIDTH, BOARD_HEIGHT, 0);
     statusPanel = new_panel(statusWin);
     box(statusWin, 0, 0);
     updateStatusWin();
@@ -270,7 +272,6 @@ std::string Controller::getStringInput()
 
 void Controller::printBoard()
 {
-    curs_set(TRUE);
     WINDOW *win = panel_window(boardPanel);
     wmove(win, 1, 1);
     for (int r = 0; r < board->getHeight(); r++)
@@ -280,7 +281,7 @@ void Controller::printBoard()
         {
             if(board->getMatrix()[r][c])
             {
-                waddch(win, ' '|A_REVERSE);
+                waddch(win, 'X');
                 //boardrow += "X";
             }
             else
@@ -416,4 +417,84 @@ void Controller::GetPatternDimensions(int &height, int &width)
         }
     }
     curs_set(FALSE);
+}
+
+void Controller::EditMode()
+{
+    WINDOW* boardWin = panel_window(boardPanel);
+    keypad(boardWin, TRUE);
+    mvwaddch(boardWin, BOARD_HEIGHT / 2, BOARD_WIDTH / 2, winch(boardWin)|A_STANDOUT);
+    wmove(boardWin, BOARD_HEIGHT / 2, BOARD_WIDTH / 2);
+	wchar_t input = 'a';
+	int x = 0, y = 0;
+	while((input = wgetch(boardWin)) != 'p')
+	{
+		getyx(boardWin, y, x);
+        waddch(boardWin, char( winch(boardWin) ));
+        wmove(boardWin, y, x);
+        //wprintw(boardWin, "%d", y);
+        //wprintw(boardWin, "%d", x);
+        switch(input)
+        {
+            case KEY_UP:
+                if(y == 1)
+                {
+                    wmove(boardWin, BOARD_HEIGHT - 2, x);
+                }
+                else
+                {
+                    wmove(boardWin, y-1, x);
+                }
+                getyx(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case KEY_DOWN:
+                if(y == (BOARD_HEIGHT - 2))
+                {
+                    wmove(boardWin, 1, x);
+                }
+                else
+                {
+                    wmove(boardWin, y+1, x);
+                }
+                getyx(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case KEY_LEFT:
+                if(x == 1)
+                {
+                    wmove(boardWin, y, BOARD_WIDTH - 2);
+                }
+                else
+                {
+                    wmove(boardWin, y, x-1);
+                }
+                getyx(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case KEY_RIGHT:
+                if(x == BOARD_WIDTH - 2)
+                {
+                    wmove(boardWin, y, 1);
+                }
+                else
+                {
+                    wmove(boardWin, y, x+1);
+                }
+                getyx(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case ' ':
+                board->toggle(y-1, x-1);
+                printBoard();
+                wmove(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+        }
+	}
 }
