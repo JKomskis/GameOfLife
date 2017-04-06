@@ -17,17 +17,6 @@ Controller::Controller()
     termCol = maxX;
     speed = 1;
     state = "Loading";
-    board = new Board(true, BOARD_HEIGHT - 2, BOARD_WIDTH - 2);
-    //Create window for the board
-    WINDOW *boardWin = newwin(BOARD_HEIGHT, BOARD_WIDTH, 0, 0);
-    boardPanel = new_panel(boardWin);
-    box(boardWin, 0, 0);
-    //Create window for the bottom status area
-    WINDOW *statusWin = newwin(STATUS_HEIGHT, STATUS_WIDTH, BOARD_HEIGHT, 0);
-    statusPanel = new_panel(statusWin);
-    box(statusWin, 0, 0);
-    updateStatusWin();
-    updateScreen();
 }
 
 void Controller::printCenter(WINDOW *win, std::string str, int row, int width)
@@ -78,7 +67,7 @@ int Controller::getMainMenuChoice()
     show_panel(menuPanel);
 	wrefresh(my_menu_win);
     wchar_t ch;
-	while((ch = wgetch(my_menu_win)) != 10)
+	while((ch = wgetch(my_menu_win)) != 10 && ch != 27)
 	{       switch(ch)
 	        {
 				case KEY_DOWN:
@@ -92,9 +81,12 @@ int Controller::getMainMenuChoice()
 			}
             wrefresh(my_menu_win);
 	}
-
+    int choice = 0;
+    if(ch == 27)
+        choice = -1;
 	/* Unpost and free all the memory taken up */
-    int choice = item_index(current_item(my_menu));
+    else
+        choice = item_index(current_item(my_menu));
     unpost_menu(my_menu);
     free_menu(my_menu);
     for(int i = 0; i < 5; ++i)
@@ -107,13 +99,38 @@ int Controller::getMainMenuChoice()
 void Controller::createNewBoard(bool wrapAround)
 {
     delete board;
+    wclear(panel_window(boardPanel));
+    wclear(panel_window(statusPanel));
     board = new Board(wrapAround, BOARD_HEIGHT - 2, BOARD_WIDTH - 2);
+    //Create window for the board
+    WINDOW *boardWin = newwin(BOARD_HEIGHT, BOARD_WIDTH, 0, 0);
+    boardPanel = new_panel(boardWin);
+    box(boardWin, 0, 0);
+    //Create window for the bottom status area
+    WINDOW *statusWin = newwin(STATUS_HEIGHT, STATUS_WIDTH, BOARD_HEIGHT, 0);
+    statusPanel = new_panel(statusWin);
+    box(statusWin, 0, 0);
+    updateStatusWin();
+    updateScreen();
 }
 
 void Controller::createNewBoard(std::string filename)
 {
     delete board;
+    wclear(panel_window(boardPanel));
+    wclear(panel_window(statusPanel));
     board = loadFormat(filename);
+    int height = board->getHeight();
+    int width = board->getWidth();
+    WINDOW *boardWin = newwin(height + 2, width + 2, termRow / 2 - height / 2, termCol / 2 - width / 2);
+    boardPanel = new_panel(boardWin);
+    box(boardWin, 0, 0);
+    //Create window for the bottom status area
+    WINDOW *statusWin = newwin(STATUS_HEIGHT, STATUS_WIDTH, BOARD_HEIGHT, 0);
+    statusPanel = new_panel(statusWin);
+    box(statusWin, 0, 0);
+    updateStatusWin();
+    updateScreen();
 }
 
 void Controller::randomizeBoard()
@@ -296,6 +313,7 @@ void Controller::printBoard()
     }
     show_panel(boardPanel);
     updateScreen();
+    wmove(win, 1, 1);
 }
 
 void Controller::runIteration()
@@ -423,15 +441,20 @@ void Controller::EditMode()
 {
     WINDOW* boardWin = panel_window(boardPanel);
     keypad(boardWin, TRUE);
-    mvwaddch(boardWin, BOARD_HEIGHT / 2, BOARD_WIDTH / 2, winch(boardWin)|A_STANDOUT);
-    wmove(boardWin, BOARD_HEIGHT / 2, BOARD_WIDTH / 2);
+    int maxX = 0, maxY = 0;
+    getmaxyx(boardWin, maxY, maxX);
+    mvwaddch(boardWin, maxY / 2, maxX / 2, winch(boardWin)|A_STANDOUT);
+    wmove(boardWin, maxY / 2, maxX / 2);
 	wchar_t input = 'a';
 	int x = 0, y = 0;
 	while((input = wgetch(boardWin)) != 'p')
 	{
-		getyx(boardWin, y, x);
-        waddch(boardWin, char( winch(boardWin) ));
-        wmove(boardWin, y, x);
+        if( input == KEY_UP || input == KEY_DOWN || input == KEY_LEFT || input == KEY_RIGHT || input == ' ')
+        {
+            getyx(boardWin, y, x);
+            waddch(boardWin, char( winch(boardWin) ));
+            wmove(boardWin, y, x);
+        }
         //wprintw(boardWin, "%d", y);
         //wprintw(boardWin, "%d", x);
         switch(input)
@@ -439,7 +462,7 @@ void Controller::EditMode()
             case KEY_UP:
                 if(y == 1)
                 {
-                    wmove(boardWin, BOARD_HEIGHT - 2, x);
+                    wmove(boardWin, maxY - 2, x);
                 }
                 else
                 {
@@ -450,7 +473,7 @@ void Controller::EditMode()
                 wmove(boardWin, y, x);
                 break;
             case KEY_DOWN:
-                if(y == (BOARD_HEIGHT - 2))
+                if(y == (maxY - 2))
                 {
                     wmove(boardWin, 1, x);
                 }
@@ -465,7 +488,7 @@ void Controller::EditMode()
             case KEY_LEFT:
                 if(x == 1)
                 {
-                    wmove(boardWin, y, BOARD_WIDTH - 2);
+                    wmove(boardWin, y, maxX - 2);
                 }
                 else
                 {
@@ -476,7 +499,7 @@ void Controller::EditMode()
                 wmove(boardWin, y, x);
                 break;
             case KEY_RIGHT:
-                if(x == BOARD_WIDTH - 2)
+                if(x == maxX - 2)
                 {
                     wmove(boardWin, y, 1);
                 }

@@ -8,9 +8,9 @@
 
 class Controller
 {
-    PANEL *boardPanel;
-    PANEL *statusPanel;
-    PANEL *mainMenuPanel;
+    PANEL *boardPanel = nullptr;
+    PANEL *statusPanel = nullptr;
+    PANEL *mainMenuPanel = nullptr;
     Board *board = nullptr;
     int termRow, termCol;
 
