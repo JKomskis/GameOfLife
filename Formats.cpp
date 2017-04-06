@@ -79,7 +79,9 @@ Board * loadRLE(string filename)
 		for (int i = 0; i < (int)line.length(); i++)
 		{
 			char c = line.at(i);
-
+			// handle newlines
+			if (c == '\n' || c == '\r')
+				continue;
 			// handle RLE number
 			if ('0' <= c && c <= '9')
 			{
@@ -87,11 +89,12 @@ Board * loadRLE(string filename)
 				continue;
 			}
 
-			// handle newline / quit chars
+			// handle board newline / quit chars
 			if (c == '$')
 			{
 				y++;
 				x = 0;
+				count = 0;
 				continue;
 			}
 			if (c == '!')
@@ -102,7 +105,6 @@ Board * loadRLE(string filename)
 			// ok, actually print
 			if (count)
 			{
-
 				for (int j = 0; j < count; j++)
 				{
 					if (c == 'o')
@@ -144,16 +146,8 @@ Board * loadFormat(string filename)
 /*
 int main( int argc, char* args[] )
 {
-	Board *test = load("formats/sample.life");
+	Board *test = loadFormat("rlepack/gosperglidergun.rle");
 	test->printBoard();
-	cout << endl;
-
-	Board *rle = load("formats/sample1.rle");
-	rle->printBoard();
-	cout << endl;
-
-	Board *rle2 = load("formats/sample2.rle");
-	rle2->printBoard();
 	cout << endl;
 
 	return 0;

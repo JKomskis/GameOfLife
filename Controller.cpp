@@ -2,8 +2,10 @@
 
 #define MAIN_MENU_HEIGHT 7
 #define MAIN_MENU_WIDTH 28
-#define BOARD_HEIGHT termRow * .9
+#define BOARD_HEIGHT (termRow - STATUS_HEIGHT)
 #define BOARD_WIDTH termCol
+#define STATUS_HEIGHT 5
+#define STATUS_WIDTH termCol
 
 #include <iostream>
 
@@ -15,17 +17,6 @@ Controller::Controller()
     termCol = maxX;
     speed = 1;
     state = "Loading";
-    board = new Board(true, BOARD_HEIGHT - 2, BOARD_WIDTH - 2);
-    //Create window for the board
-    WINDOW *boardWin = newwin(BOARD_HEIGHT, BOARD_WIDTH, 0, 0);
-    boardPanel = new_panel(boardWin);
-    box(boardWin, 0, 0);
-    //Create window for the bottom status area
-    WINDOW *statusWin = newwin(termRow - BOARD_HEIGHT + 1, BOARD_WIDTH, BOARD_HEIGHT, 0);
-    statusPanel = new_panel(statusWin);
-    box(statusWin, 0, 0);
-    updateStatusWin();
-    updateScreen();
 }
 
 void Controller::printCenter(WINDOW *win, std::string str, int row, int width)
@@ -76,7 +67,7 @@ int Controller::getMainMenuChoice()
     show_panel(menuPanel);
 	wrefresh(my_menu_win);
     wchar_t ch;
-	while((ch = wgetch(my_menu_win)) != 10)
+	while((ch = wgetch(my_menu_win)) != 10 && ch != 27)
 	{       switch(ch)
 	        {
 				case KEY_DOWN:
@@ -90,9 +81,12 @@ int Controller::getMainMenuChoice()
 			}
             wrefresh(my_menu_win);
 	}
-
+    int choice = 0;
+    if(ch == 27)
+        choice = -1;
 	/* Unpost and free all the memory taken up */
-    int choice = item_index(current_item(my_menu));
+    else
+        choice = item_index(current_item(my_menu));
     unpost_menu(my_menu);
     free_menu(my_menu);
     for(int i = 0; i < 5; ++i)
@@ -105,13 +99,38 @@ int Controller::getMainMenuChoice()
 void Controller::createNewBoard(bool wrapAround)
 {
     delete board;
+    wclear(panel_window(boardPanel));
+    wclear(panel_window(statusPanel));
     board = new Board(wrapAround, BOARD_HEIGHT - 2, BOARD_WIDTH - 2);
+    //Create window for the board
+    WINDOW *boardWin = newwin(BOARD_HEIGHT, BOARD_WIDTH, 0, 0);
+    boardPanel = new_panel(boardWin);
+    box(boardWin, 0, 0);
+    //Create window for the bottom status area
+    WINDOW *statusWin = newwin(STATUS_HEIGHT, STATUS_WIDTH, BOARD_HEIGHT, 0);
+    statusPanel = new_panel(statusWin);
+    box(statusWin, 0, 0);
+    updateStatusWin();
+    updateScreen();
 }
 
 void Controller::createNewBoard(std::string filename)
 {
     delete board;
+    wclear(panel_window(boardPanel));
+    wclear(panel_window(statusPanel));
     board = loadFormat(filename);
+    int height = board->getHeight();
+    int width = board->getWidth();
+    WINDOW *boardWin = newwin(height + 2, width + 2, termRow / 2 - height / 2, termCol / 2 - width / 2);
+    boardPanel = new_panel(boardWin);
+    box(boardWin, 0, 0);
+    //Create window for the bottom status area
+    WINDOW *statusWin = newwin(STATUS_HEIGHT, STATUS_WIDTH, BOARD_HEIGHT, 0);
+    statusPanel = new_panel(statusWin);
+    box(statusWin, 0, 0);
+    updateStatusWin();
+    updateScreen();
 }
 
 void Controller::randomizeBoard()
@@ -188,13 +207,15 @@ void Controller::setSpeed(int newSpeed)
 void Controller::updateStatusWin()
 {
     WINDOW* statusWin = panel_window(statusPanel);
-    mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tBirths:\tDeaths:\tSpeed:");
+    mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tIterations:\tBirths:\tDeaths:\tSpeed:");
     mvwprintw(statusWin, 3, 1, "%d", board->getHeight());
     wprintw(statusWin, " x ");
     wprintw(statusWin, "%d", board->getWidth());
     wprintw(statusWin, "\t");
     wprintw(statusWin, state.c_str());
     wprintw(statusWin, "\t");
+    wprintw(statusWin, "%d", board->getIterations());
+    wprintw(statusWin, "\t\t");
     wprintw(statusWin, "%d", board->getBirths());
     wprintw(statusWin, "\t");
     wprintw(statusWin, "%d", board->getDeaths());
@@ -270,7 +291,6 @@ std::string Controller::getStringInput()
 
 void Controller::printBoard()
 {
-    curs_set(TRUE);
     WINDOW *win = panel_window(boardPanel);
     wmove(win, 1, 1);
     for (int r = 0; r < board->getHeight(); r++)
@@ -280,7 +300,7 @@ void Controller::printBoard()
         {
             if(board->getMatrix()[r][c])
             {
-                waddch(win, ' '|A_REVERSE);
+                waddch(win, 'X');
                 //boardrow += "X";
             }
             else
@@ -295,6 +315,7 @@ void Controller::printBoard()
     }
     show_panel(boardPanel);
     updateScreen();
+    wmove(win, 1, 1);
 }
 
 void Controller::runIteration()
@@ -416,4 +437,103 @@ void Controller::GetPatternDimensions(int &height, int &width)
         }
     }
     curs_set(FALSE);
+}
+
+bool Controller::EditMode()
+{
+    WINDOW* boardWin = panel_window(boardPanel);
+    keypad(boardWin, TRUE);
+    int maxX = 0, maxY = 0;
+    getmaxyx(boardWin, maxY, maxX);
+    mvwaddch(boardWin, maxY / 2, maxX / 2, winch(boardWin)|A_STANDOUT);
+    wmove(boardWin, maxY / 2, maxX / 2);
+	wchar_t input = 'a';
+	int x = 0, y = 0;
+	while((input = wgetch(boardWin)) != 'p')
+	{
+        if( input == KEY_UP || input == KEY_DOWN || input == KEY_LEFT || input == KEY_RIGHT || input == ' ')
+        {
+            getyx(boardWin, y, x);
+            waddch(boardWin, char( winch(boardWin) ));
+            wmove(boardWin, y, x);
+        }
+        //wprintw(boardWin, "%d", y);
+        //wprintw(boardWin, "%d", x);
+        switch(input)
+        {
+            case KEY_UP:
+                if(y == 1)
+                {
+                    wmove(boardWin, maxY - 2, x);
+                }
+                else
+                {
+                    wmove(boardWin, y-1, x);
+                }
+                getyx(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case KEY_DOWN:
+                if(y == (maxY - 2))
+                {
+                    wmove(boardWin, 1, x);
+                }
+                else
+                {
+                    wmove(boardWin, y+1, x);
+                }
+                getyx(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case KEY_LEFT:
+                if(x == 1)
+                {
+                    wmove(boardWin, y, maxX - 2);
+                }
+                else
+                {
+                    wmove(boardWin, y, x-1);
+                }
+                getyx(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case KEY_RIGHT:
+                if(x == maxX - 2)
+                {
+                    wmove(boardWin, y, 1);
+                }
+                else
+                {
+                    wmove(boardWin, y, x+1);
+                }
+                getyx(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case ' ':
+                board->toggle(y-1, x-1);
+                printBoard();
+                wmove(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case '[':
+                setSpeed(-1);
+                break;
+            case ']':
+                setSpeed(1);
+                break;
+            case 10:
+                runIteration();
+                printBoard();
+                break;
+            case 27:
+                return true;
+                break;
+        }
+	}
+    return false;
 }

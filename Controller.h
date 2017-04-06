@@ -8,9 +8,9 @@
 
 class Controller
 {
-    PANEL *boardPanel;
-    PANEL *statusPanel;
-    PANEL *mainMenuPanel;
+    PANEL *boardPanel = nullptr;
+    PANEL *statusPanel = nullptr;
+    PANEL *mainMenuPanel = nullptr;
     Board *board = nullptr;
     int termRow, termCol;
 
@@ -24,7 +24,9 @@ class Controller
         Controller();
         void createNewBoard(bool wrapAround);
         void createNewBoard(std::string filename);
+        bool EditMode();
         void randomizeBoard();
+        WINDOW* GetBoardWindow();
         bool GetYesOrNo(std::string dialog);
         int getMainMenuChoice();
         void GetPatternDimensions(int &height, int &width);

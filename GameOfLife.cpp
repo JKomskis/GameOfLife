@@ -3,6 +3,36 @@
 #include <stdlib.h>
 #include <ctime>
 
+void MainMenu(Controller *controller)
+{
+	std::string filename = "";
+	bool wrapAround = true;
+	switch( controller->getMainMenuChoice() )
+	{
+		case 0:
+			//Create a new blank board
+			wrapAround = controller->GetYesOrNo("Would you like to enable wrap around?");
+			controller->createNewBoard(wrapAround);
+			break;
+		case 1:
+			//Load a saved board
+			filename = controller->getStringInput();
+			controller->createNewBoard(filename);
+			break;
+		case 2:
+			//Load a random board
+			wrapAround = controller->GetYesOrNo("Would you like to enable wrap around?");
+			controller->createNewBoard(wrapAround);
+			controller->randomizeBoard();
+			break;
+		case 3:
+			//Load the pattern editor
+			break;
+	}
+	controller->setState("Paused");
+	controller->printBoard();
+}
+
 int main()
 {
     //Setup
@@ -15,39 +45,15 @@ int main()
     keypad(stdscr, TRUE);
     Controller *controller = new Controller();
     controller->updateScreen();
-    std::string filename = "";
-    switch( controller->getMainMenuChoice() )
-    {
-        case 0:
-            //Create a new blank board
-            controller->createNewBoard(true);
-            break;
-        case 1:
-            //Load a saved board
-            //ADD WAY TO GET FILENAME
-            filename = controller->getStringInput();
-            controller->createNewBoard(filename);
-            break;
-        case 2:
-            //Load a random board
-            controller->createNewBoard(true);
-            controller->randomizeBoard();
-            break;
-        case 3:
-            //Load the pattern editor
-            break;
-    }
-    controller->setState("Paused");
-    wchar_t input;
-    std::cout << "Printing board." << std::endl;
-    controller->printBoard();
+	MainMenu(controller);
+    wchar_t input = 'a';
+    //std::cout << "Printing board." << std::endl;
     controller->updateScreen();
     int count = 0;
-    while((input = getch()) != 27)
+    while(controller->getState() == "Paused" || (input = getch()))
     {
-        std::cout << "Iteration count: " << ++count << std::endl;
-
-        if(input == '[')
+        //std::cout << "Iteration count: " << ++count << std::endl;
+		if(input == '[')
         {
             controller->setSpeed(-1);
             /*note: continue is used to make sure the simulation doesn't
@@ -55,31 +61,29 @@ int main()
             it skips an iteration*/
             continue;
         }
-        if(input == ']')
+        else if(input == ']')
         {
             controller->setSpeed(1);
             continue;
         }
-        if(input == 'p')
+        else if(input == 'p' || controller->getState() == "Paused")
         {
-            if(controller->getState() == "Paused")
-            {
-                controller->setState("Running");
-            }
-            else
-            {
-                timeout(-1);
-                controller->setState("Paused");
-            }
+            timeout(-1);
+            controller->setState("Paused");
+			if(controller->EditMode())
+			{
+				MainMenu(controller);
+			}
+			controller->setState("Running");
         }
+		else if(input == 27)
+		{
+			MainMenu(controller);
+		}
         //&& is used for an "advance one iteration" when paused
-        if(controller->getState() == "Paused" && input != ' ')
+        if(controller->getState() == "Paused")
             continue;
         timeout(1.0/controller->getSpeed() * 1000);
-        /*if( mvwinch(boardWin, 1, 1) == '+')
-            mvwprintw(boardWin, 1, 1, "-");
-        else
-            mvwprintw(boardWin, 1, 1, "+");*/
         for (int i = 1; (controller->getSpeed() > 1000) && (i < controller->getSpeed() / 1000); i++) {
             controller-> runIteration();
             count++;
