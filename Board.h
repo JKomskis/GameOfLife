@@ -31,6 +31,7 @@ public:
 	void runIteration();
 	void runIteration(int runs);
 	void addPattern(string fileName, int x, int y);
+	void addPattern(Board *pattern, int x, int y);
 	void printBoard();
 	void saveState(string fileName);
 	bool ** getMatrix();

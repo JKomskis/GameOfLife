@@ -300,11 +300,21 @@ void Board::addPattern(string fileName, int x, int y)
 		countY = 0;
 	}*/
 
+	// pretty sure there's a bug here - 4/6/17 JJK
+	// x is supposed to be horizontal
+	// used to access the y component of the matrix
 	for(int i = 0; i < heightOfSaved; i++)
 		for(int j = 0; j < widthOfSaved; j++)
 			matrix[x+i][y+j] = patternMatrix[i][j];
 	in.close();
 
+}
+
+void Board::addPattern(Board *pattern, int x, int y)
+{
+	for(int i = 0; i < pattern->getHeight(); i++)
+		for(int j = 0; j < pattern->getWidth(); j++)
+			matrix[y+i][x+j] = pattern->getMatrix()[i][j];
 }
 
 int Board::getHeight()
