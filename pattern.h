@@ -25,7 +25,7 @@ public:
 
 	Pattern(std::string filename);
 	void rotateSquare(int size);
-	void rotate(int rot);
+	void rotate();
 	int getPatternHeight();
 	int getPatternWidth();
 
@@ -85,14 +85,14 @@ void Pattern::rotateSquare(int size)
 }
 
 //for rectangle patterns
-void Pattern::rotate(int rot)
+void Pattern::rotate()
 {
 	int rotateRectangle[width][height] = {{0}};
 	for(int i=0; i<height; i++)
 	{
 		for (int j=0; j<width; j++)
 		{
-		rotateRectangle[width][height] = patternMatrix[height][width];
+		rotateRectangle[j][i] = patternMatrix[i][j];
 		}
 	}
 }
