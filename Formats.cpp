@@ -2,9 +2,15 @@
 #include <fstream>
 #include <string>
 #include <stdlib.h>
+#include <vector>
+#include <ctime>
 #include "Board.h"
 #include "Formats.h"
 #include "Util.h"
+typedef struct{
+	int x;
+	int y;
+} coords;
 
 Board * loadLife(string filename)
 {
@@ -16,32 +22,62 @@ Board * loadLife(string filename)
 	string line;
 	// check the header
 	getline(in, line);
-	if (line.compare("#Life 1.05"))
-		throw "Invalid Life 1.05 Header";
-
-	// skip filler lines
-	while(line.size() == 0 || line.at(0) == '#')
-		getline(in, line);
-	// cache the lines to avoid having to re-read
-	string boardLines[20];
+	char type = line.back();
+	if (line.compare("#Life 1.0") != 1 ||
+		(type != '5' && type != '6'))
+		throw "Invalid Life Header";
+	
+	vector<coords> toggleList;
 	int width = 0, height = 0;
-	do
+	int x = 0, y = 0;
+	if (type == '5')
 	{
-		 boardLines[height++] = line;
-		 if(width != 0 && (unsigned int)width != line.length())
-			throw "Error: Non-rectangular matrix";
-		 width = line.length();
-
-	}while(getline(in, line));
-
+		while(getline(in, line))
+		{
+			if(line.size() == 0 || line.at(0) == '#')
+				continue;
+			if(width != 0 && width != (int)line.length())
+				throw "Error: Non-rectangular matrix";
+			width = line.length();
+			for(x = 0; x < width; x++)
+				if(line.at(x) == '*')
+				{
+					coords c = {x, y};
+					toggleList.push_back(c);
+				}
+			y++;
+		};
+		height = y;
+	}
+	else
+	{
+		while(getline(in, line))
+		{
+			if(line.size() == 0 || line.at(0) == '#')
+				continue;
+			sscanf(line.c_str(), "%d %d", &x, &y);
+			if(x > width)
+				width = x;
+			if(y > height)
+				height = y;
+			coords c = {x, y};
+			toggleList.push_back(c);
+		};
+		width++;
+		height++;
+	}
 	in.close();
 
 	// create & apply the data set
-	Board *ret = new Board(true, height, width);
-	for(int i = 0; i < width; i++)
-		for(int j = 0; j < height; j++)
-			if(boardLines[i].at(j) == '*')
-				ret->toggle(i, j);
+	Board *ret = new Board(true, width, height);
+	
+	
+	for(int i = 0; i < (int)toggleList.size(); i++)
+	{
+		ret->toggle(toggleList.at(i).y,
+					toggleList.at(i).x);
+		//cout << toggleList.at(i).x << "," << toggleList.at(i).y << endl;
+	}
 
 	return ret;
 
@@ -146,10 +182,10 @@ Board * loadFormat(string filename)
 /*
 int main( int argc, char* args[] )
 {
-	Board *test = loadFormat("rlepack/gosperglidergun.rle");
+	Board *test = loadFormat("sample2.life");
 	test->printBoard();
 	cout << endl;
-
+	
 	return 0;
 }
 */
