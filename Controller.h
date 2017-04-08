@@ -45,5 +45,6 @@ class Controller
         void updateScreen();
         void updateStatusWin();
         void printBoard();
+        void RenderPattern(std::vector<std::vector<bool>>&);
         void runIteration();
 };

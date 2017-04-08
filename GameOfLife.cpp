@@ -54,6 +54,8 @@ int main()
     noecho();
     timeout(-1);
     curs_set(FALSE);
+	start_color();
+	init_pair(1, COLOR_RED, COLOR_BLACK);
     keypad(stdscr, TRUE);
     Controller *controller = new Controller();
     controller->updateScreen();

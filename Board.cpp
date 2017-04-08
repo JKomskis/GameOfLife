@@ -281,7 +281,7 @@ void Board::addPattern(vector<vector<bool>> patternMatrix, int y, int x)
 	{
 		for(size_t j = 0; j < patternMatrix[0].size(); j++)
 		{
-			matrix[y+i][x+j] = patternMatrix[i][j];
+			matrix[(y + i) % matrix.size()][(x + j) % matrix[0].size()] = patternMatrix[i][j];
 		}
 	}
 }

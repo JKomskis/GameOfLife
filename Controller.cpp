@@ -469,6 +469,8 @@ bool Controller::EditMode()
         std::string filename = "";
         bool isFileValid = false;
         Pattern *pattern = nullptr;
+        std::string layout = "";
+        std::vector<std::vector<bool>> matrix;
         switch(input)
         {
             case KEY_UP:
@@ -550,8 +552,64 @@ bool Controller::EditMode()
                     }
                     isFileValid = true;
                 }
-                board->addPattern(pattern->getMatrix(), y-1, x-1);
-                //board->toggle(y, x);
+                matrix = pattern->getMatrix();
+                RenderPattern(matrix);
+                while((input = wgetch(boardWin)) != 'a')
+                {
+                    getyx(boardWin, y, x);
+                    switch(input)
+                    {
+                        case KEY_UP:
+                            if(y == 1)
+                            {
+                                wmove(boardWin, maxY - 2, x);
+                            }
+                            else
+                            {
+                                wmove(boardWin, y-1, x);
+                            }
+                            RenderPattern(matrix);
+                            break;
+                        case KEY_DOWN:
+                            if(y == (maxY - 2))
+                            {
+                                wmove(boardWin, 1, x);
+                            }
+                            else
+                            {
+                                wmove(boardWin, y+1, x);
+                            }
+                            RenderPattern(matrix);
+                            break;
+                        case KEY_LEFT:
+                            if(x == 1)
+                            {
+                                wmove(boardWin, y, maxX - 2);
+                            }
+                            else
+                            {
+                                wmove(boardWin, y, x-1);
+                            }
+                            RenderPattern(matrix);
+                            break;
+                        case KEY_RIGHT:
+                            if(x == maxX - 2)
+                            {
+                                wmove(boardWin, y, 1);
+                            }
+                            else
+                            {
+                                wmove(boardWin, y, x+1);
+                            }
+                            RenderPattern(matrix);
+                            break;
+                        case 10:
+                            board->addPattern(pattern->getMatrix(), y, x);
+                            break;
+                    }
+                }
+                werase(boardWin);
+                box(boardWin, 0, 0);
                 printBoard();
                 wmove(boardWin, y, x);
                 break;
@@ -565,4 +623,22 @@ bool Controller::EditMode()
         }
 	}
     return false;
+}
+
+void Controller::RenderPattern(std::vector<std::vector<bool>>& matrix)
+{
+    WINDOW *boardWin = panel_window(boardPanel);
+    int x = 0, y = 0;
+    getyx(boardWin, y, x);
+    printBoard();
+    wattron(boardWin, COLOR_PAIR(1));
+    for(size_t i = 0; i < matrix.size(); ++i)
+    {
+        for(size_t j = 0; j < matrix[0].size(); ++j)
+        {
+            mvwprintw(boardWin, (y + i) % board->getMatrix().size() + 1, (x + j) % board->getMatrix()[0].size() + 1, (matrix[i][j]) ? "X" : "");
+        }
+    }
+    wattroff(boardWin, COLOR_PAIR(1));
+    wmove(boardWin, y, x);
 }
