@@ -3,8 +3,10 @@
 #include <form.h>
 #include <menu.h>
 #include <string>
+#include <vector>
 #include "Board.h"
 #include "Formats.h"
+#include "pattern.h"
 
 class Controller
 {

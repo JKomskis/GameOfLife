@@ -7,12 +7,10 @@
 #include <string>
 #include <stdlib.h>
 #include "Board.h"
-//#include "Formats.h"
-#include "Util.h"
 
 using namespace std;
 
-Board::Board(bool wrap, int h, int w)
+Board::Board(bool wrap, int h, int w): matrix(h, vector<bool> (w, 0))
 {
 	this->height = h;
 	this->width = w;
@@ -22,63 +20,28 @@ Board::Board(bool wrap, int h, int w)
 	this->iterations = 0;
 	this->births = 0;
 	this->deaths = 0;
-
-	matrix = new bool*[height];
+	/*matrix = new bool*[height];
 
 	for (int i = 0; i < height; i++)
 	{
 		matrix[i] = new bool[width];
-	}
+	}*/
 
-	for (int i = 0; i < height; i++)
+	/*for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
 		{
 			matrix[i][j] = 0;
 		}
-	}
+	}*/
 }
 
 Board::Board(string filename)
 {
-	ifstream in;
-	in.open(filename.c_str());
-
-	if (!in.is_open())
-	{
-		cerr << "File not opened '" << filename << "'" << endl;
-	}
-
-	string line;
-
-	height = fs_atoi(in);
-	width = fs_atoi(in);
-
-	wrapAround = fs_atoi(in);
-	iterations = fs_atoi(in);
-	births = fs_atoi(in);
-	deaths = fs_atoi(in);
-
-	//initialize matrix
-	matrix = new bool*[height];
-	for (int i = 0; i < height; i++)
-	{
-		matrix[i] = new bool[width];
-	}
-
-	int row = 0;
-	string a;
-	while(getline(in, line))
-	{
-		for(int i = 0; i <width; i++)
-		{
-			a = line[i];
-			matrix[row][i] = atoi(a.c_str());
-		}
-		row++;
-	}
-
-	in.close();
+	matrix = loadFormat(filename);
+	height = sizeof(matrix) / sizeof(matrix[0]);
+	width = sizeof(matrix[0]) / sizeof(bool);
+	wrapAround = true;
 
 }
 
@@ -209,7 +172,7 @@ void Board::runIteration(int runs)	//runs the interation the correct number of t
 	}
 }
 
-bool** Board::getMatrix()
+vector<vector<bool>>& Board::getMatrix()
 {
 	return this->matrix;
 }
@@ -312,11 +275,15 @@ void Board::addPattern(string fileName, int x, int y)
 
 }
 
-void Board::addPattern(Board *pattern, int x, int y)
+void Board::addPattern(vector<vector<bool>> patternMatrix, int y, int x)
 {
-	for(int i = 0; i < pattern->getHeight(); i++)
-		for(int j = 0; j < pattern->getWidth(); j++)
-			matrix[y+i][x+j] = pattern->getMatrix()[i][j];
+	for(size_t i = 0; i < patternMatrix.size(); i++)
+	{
+		for(size_t j = 0; j < patternMatrix[0].size(); j++)
+		{
+			matrix[y+i][x+j] = patternMatrix[i][j];
+		}
+	}
 }
 
 int Board::getHeight()

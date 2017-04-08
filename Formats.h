@@ -5,10 +5,12 @@
 #include <string>
 #include <cstdlib>
 #include "Board.h"
+#include <vector>
 
 using namespace std;
 
-Board * loadLife(string filename);
-Board * loadRLE(string filename);
-Board * loadFormat(string filename);
+vector<vector<bool>> loadLife(string filename);
+vector<vector<bool>> loadRLE(string filename);
+vector<vector<bool>> loadFormat(string filename);
+vector<vector<bool>> loadBRD(string filename);
 #endif /* FORMATS_H_ */

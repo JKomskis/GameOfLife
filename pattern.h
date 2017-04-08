@@ -3,28 +3,26 @@
 
 #include <fstream>
 #include <string>
+#include "Board.h"
 
 using namespace std;
 
 class Pattern: public Board {
-
-private:
-
-	bool** patternMatrix;
-	int heightOfPattern;
-	int widthOfPattern;
+	//bool** patternMatrix;
+	//int heightOfPattern;
+	//int widthOfPattern;
 
 public:
 
 	Pattern(std::string filename);
 	void rotateSquare(int size);
 	void rotate(int rot);
-	int getPatternHeight();
-	int getPatternWidth();
+	int getHeight();
+	int getWidth();
+	vector<vector<bool>> getMatrix();
 
 };
 
 
 
 #endif /* PATTERN_H_ */
-

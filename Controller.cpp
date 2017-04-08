@@ -123,7 +123,7 @@ void Controller::createNewBoard(std::string filename)
     delete board;
     wclear(panel_window(boardPanel));
     wclear(panel_window(statusPanel));
-    board = loadFormat(filename);
+    board = new Board(filename);
     int height = board->getHeight();
     int width = board->getWidth();
     WINDOW *boardWin = newwin(height + 2, width + 2, termRow / 2 - height / 2, termCol / 2 - width / 2);
@@ -299,12 +299,13 @@ void Controller::printBoard()
 {
     WINDOW *win = panel_window(boardPanel);
     wmove(win, 1, 1);
+    std::vector<std::vector<bool>> matrix = board->getMatrix();
     for (int r = 0; r < board->getHeight(); r++)
     {
         //std::string boardrow = "";
         for (int c=0; c < board->getWidth(); c++)
         {
-            if(board->getMatrix()[r][c])
+            if(matrix[r][c])
             {
                 waddch(win, 'X');
                 //boardrow += "X";
@@ -465,6 +466,9 @@ bool Controller::EditMode()
         }
         //wprintw(boardWin, "%d", y);
         //wprintw(boardWin, "%d", x);
+        std::string filename = "";
+        bool isFileValid = false;
+        Pattern *pattern = nullptr;
         switch(input)
         {
             case KEY_UP:
@@ -531,6 +535,25 @@ bool Controller::EditMode()
                 break;
             case ']':
                 setSpeed(1);
+                break;
+            case 'a':
+                getyx(boardWin, y, x);
+                while(!isFileValid)
+                {
+                    filename = getStringInput();
+                    try
+                    {
+                        pattern = new Pattern(filename);
+                    }catch(char const*)
+                    {
+                        continue;
+                    }
+                    isFileValid = true;
+                }
+                board->addPattern(pattern->getMatrix(), y-1, x-1);
+                //board->toggle(y, x);
+                printBoard();
+                wmove(boardWin, y, x);
                 break;
             case 10:
                 runIteration();

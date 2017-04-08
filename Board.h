@@ -4,14 +4,17 @@
 
 #include <string>
 #include <cstdlib>
+#include "Formats.h"
+#include "Util.h"
+#include <vector>
+//#include "pattern.h"
 
-using namespace std;
-
+//using namespace std;
 class Board{
 
-private:
+protected:
 
-	bool ** matrix;
+	std::vector<std::vector<bool>> matrix;
 	int height;
 	int width;
 
@@ -25,16 +28,16 @@ private:
 public:
 
 	Board(bool wrapAround, int height, int width);
-	Board(string filename);
+	Board(std::string filename);
 	void toggle(int x, int y);
 	void randomize(double ratio);
 	void runIteration();
 	void runIteration(int runs);
-	void addPattern(string fileName, int x, int y);
-	void addPattern(Board *pattern, int x, int y);
+	void addPattern(std::string fileName, int x, int y);
+	void addPattern(std::vector<std::vector<bool>>, int x, int y);
 	void printBoard();
-	void saveState(string fileName);
-	bool ** getMatrix();
+	void saveState(std::string fileName);
+	std::vector<std::vector<bool>>& getMatrix();
 	int numNeigh(int r, int c);
 	int countNeigh(int r, int c);
 	int getHeight();

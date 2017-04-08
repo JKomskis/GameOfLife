@@ -7,16 +7,17 @@
 
 #include <fstream>
 #include <string>
+#include <iostream>
 #include "pattern.h"
 
-Pattern::Pattern(std::string filename)
+Pattern::Pattern(std::string filename):Board(filename)
 {
-	ifstream in;
+	/*ifstream in;
 	in.open(filename.c_str());
 
 	if (!in.is_open())
 	{
-		cerr << "File not opened" << endl;
+		//std::cerr << "File not opened" << std::endl;
 	}
 	string line;
 
@@ -26,10 +27,10 @@ Pattern::Pattern(std::string filename)
 	widthOfPattern = atoi(line.c_str());	//make it an int
 
 	//initialize new patternMatrix
-	patternMatrix = new bool *[heightOfPattern];
+	matrix = new bool *[heightOfPattern];
 	for(int i = 0; i < heightOfPattern; i++)
 	{
-		patternMatrix[i] = new bool[widthOfPattern];
+		matrix[i] = new bool[widthOfPattern];
 	}
 
 	//store file values into the patternMatrix
@@ -38,7 +39,7 @@ Pattern::Pattern(std::string filename)
 	{
 		for(int i = 0; i < widthOfPattern; i++)
 		{
-			patternMatrix[row][i] = line.at(i) == '1';
+			matrix[row][i] = line.at(i) == '1';
 		}
 		row++;
 	}
@@ -46,44 +47,65 @@ Pattern::Pattern(std::string filename)
 	//check if the pattern will fit in the pattern matrix
 	if(height < heightOfPattern || width < widthOfPattern)
 	{
-		cerr << "Saved Pattern is larger than board" << endl;
-	}
+		//cerr << "Saved Pattern is larger than board" << endl;
+	}*/
 }
 
 //for square patterns
 void Pattern::rotateSquare(int size)
 {
-	int patternCopy[15][15] = {{0}};
-	for(int i =0; i<size; i++){
+	vector<vector<bool>> patternCopy(height, vector<bool> (width, 0));
+	for(int i =0; i<size; i++)
+	{
 		for(int j =0; j<size; j++)
 		{
-            patternCopy [i][j] = patternMatrix[i][j];
+            patternCopy[i][j] = matrix[i][j];
         }
     }
+	matrix = patternCopy;
 }
 
 //for rectangle patterns
 void Pattern::rotate(int rot)
 {
-	int rotateRectangle[width][height] = {{0}};
+	int **rotateRectangle = new int*[height];
+	for(int i = 0; i < height; ++i)
+	{
+		rotateRectangle[i] = new int[width];
+	}
 	for(int i=0; i<height; i++)
 	{
 		for (int j=0; j<width; j++)
 		{
-		rotateRectangle[width][height] = patternMatrix[height][width];
+		rotateRectangle[width][height] = matrix[height][width];
 		}
 	}
 }
 
-int Pattern::getPatternHeight()
+int Pattern::getHeight()
 {
-	return this->heightOfPattern;
+	return Board::getHeight();
 }
 
-int Pattern::getPatternWidth()
+int Pattern::getWidth()
 {
-	return this->widthOfPattern;
+	return Board::getHeight();
 }
 
+std::vector<std::vector<bool>> Pattern::getMatrix()
+{
+	return Board::getMatrix();
+}
 
-
+/*int main() {
+	//Pattern *test = new Pattern("rlepack/gosperglidergun.rle");
+	std::vector<std::vector<bool>> matrix = loadFormat("rlepack/gosperglidergun.rle");
+	for(int i = 0; i < 9; i++){
+		for(int j = 0; j < 36; j++)
+		{
+			std::cout << matrix[i][j] << " ";
+		}
+		std::cout <<std::endl;
+	}
+	return 0;
+}*/
