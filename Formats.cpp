@@ -91,7 +91,10 @@ vector<vector<bool>> loadRLE(string filename)
 			// handle board newline / quit chars
 			if (c == '$')
 			{
-				y++;
+				if (count > 0)
+					y += count;
+				else
+					y++;
 				x = 0;
 				count = 0;
 				continue;
@@ -183,7 +186,7 @@ vector<vector<bool>> loadFormat(string filename)
 /*
 int main( int argc, char* args[] )
 {
-	Board *test = loadFormat("rlepack/gosperglidergun.rle");
+	Board *test = loadFormat("rlepack/copperhead.rle");
 	test->printBoard();
 	cout << endl;
 
