@@ -554,8 +554,9 @@ bool Controller::EditMode()
                 }
                 matrix = pattern->getMatrix();
                 RenderPattern(matrix);
-                while((input = wgetch(boardWin)) != 'a')
+                do
                 {
+                    input = wgetch(boardWin);
                     getyx(boardWin, y, x);
                     switch(input)
                     {
@@ -607,7 +608,7 @@ bool Controller::EditMode()
                             board->addPattern(pattern->getMatrix(), y, x);
                             break;
                     }
-                }
+                } while(input != 10);
                 werase(boardWin);
                 box(boardWin, 0, 0);
                 printBoard();
