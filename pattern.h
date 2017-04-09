@@ -16,7 +16,7 @@ public:
 
 	Pattern(std::string filename);
 	void rotateSquare(int size);
-	void rotate(int rot);
+	void Rotate();
 	int getHeight();
 	int getWidth();
 	vector<vector<bool>> getMatrix();

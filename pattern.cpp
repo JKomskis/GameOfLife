@@ -51,35 +51,17 @@ Pattern::Pattern(std::string filename):Board(filename)
 	}*/
 }
 
-//for square patterns
-void Pattern::rotateSquare(int size)
+void Pattern::Rotate()
 {
-	vector<vector<bool>> patternCopy(height, vector<bool> (width, 0));
-	for(int i =0; i<size; i++)
+	vector<vector<bool>> patternCopy(matrix[0].size(), vector<bool> (matrix.size(), 0));
+	for(size_t i=0; i<patternCopy.size(); i++)
 	{
-		for(int j =0; j<size; j++)
+		for (size_t j=0; j<patternCopy[0].size(); j++)
 		{
-            patternCopy[i][j] = matrix[i][j];
-        }
-    }
-	matrix = patternCopy;
-}
-
-//for rectangle patterns
-void Pattern::rotate(int rot)
-{
-	int **rotateRectangle = new int*[height];
-	for(int i = 0; i < height; ++i)
-	{
-		rotateRectangle[i] = new int[width];
-	}
-	for(int i=0; i<height; i++)
-	{
-		for (int j=0; j<width; j++)
-		{
-		rotateRectangle[width][height] = matrix[height][width];
+		patternCopy[i][j] = matrix[matrix.size()-1-j][i];
 		}
 	}
+	matrix = patternCopy;
 }
 
 int Pattern::getHeight()
@@ -98,12 +80,21 @@ std::vector<std::vector<bool>> Pattern::getMatrix()
 }
 
 /*int main() {
-	//Pattern *test = new Pattern("rlepack/gosperglidergun.rle");
-	std::vector<std::vector<bool>> matrix = loadFormat("rlepack/gosperglidergun.rle");
-	for(int i = 0; i < 9; i++){
-		for(int j = 0; j < 36; j++)
+	Pattern *test = new Pattern("rlepack/gosperglidergun.rle");
+	//std::vector<std::vector<bool>> matrix = loadFormat("rlepack/gosperglidergun.rle");
+	for(int i = 0; i < test->getMatrix().size(); i++){
+		for(int j = 0; j < test->getMatrix()[0].size(); j++)
 		{
-			std::cout << matrix[i][j] << " ";
+			std::cout << test->getMatrix()[i][j] << " ";
+		}
+		std::cout <<std::endl;
+	}
+	std::cout << std::endl <<std::endl;
+	test->Rotate();
+	for(int i = 0; i < test->getMatrix().size(); i++){
+		for(int j = 0; j < test->getMatrix()[0].size(); j++)
+		{
+			std::cout << test->getMatrix()[i][j] << " ";
 		}
 		std::cout <<std::endl;
 	}

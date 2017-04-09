@@ -604,6 +604,18 @@ bool Controller::EditMode()
                             }
                             RenderPattern(matrix);
                             break;
+                        case '\'':
+                            pattern->Rotate();
+                            matrix = pattern->getMatrix();
+                            RenderPattern(matrix);
+                            break;
+                        case ';':
+                            pattern->Rotate();
+                            pattern->Rotate();
+                            pattern->Rotate();
+                            matrix = pattern->getMatrix();
+                            RenderPattern(matrix);
+                            break;
                         case 10:
                             board->addPattern(pattern->getMatrix(), y, x);
                             break;
