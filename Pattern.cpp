@@ -8,7 +8,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
-#include "pattern.h"
+#include "Pattern.h"
 
 Pattern::Pattern(std::string filename):Board(filename)
 {

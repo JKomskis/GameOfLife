@@ -6,7 +6,7 @@
 #include <vector>
 #include "Board.h"
 #include "Formats.h"
-#include "pattern.h"
+#include "Pattern.h"
 
 class Controller
 {
