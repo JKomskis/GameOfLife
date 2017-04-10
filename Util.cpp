@@ -1,8 +1,4 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <stdlib.h>
-#include <ctime>
+#include "Util.h"
 using namespace std;
 
 int fs_atoi(ifstream &input)

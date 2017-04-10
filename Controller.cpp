@@ -123,9 +123,10 @@ void Controller::createNewBoard(std::string filename)
     wclear(panel_window(boardPanel));
     wclear(panel_window(statusPanel));
     board = new Board(filename);
+    //while(true){};
     int height = board->getHeight();
     int width = board->getWidth();
-    WINDOW *boardWin = newwin(height + 2, width + 2, termRow / 2 - height / 2, termCol / 2 - width / 2);
+    WINDOW *boardWin = newwin(height + 2, width + 2, 0, 0);
     boardPanel = new_panel(boardWin);
     box(boardWin, 0, 0);
     //Create window for the bottom status area
@@ -231,7 +232,7 @@ void Controller::updateStatusWin()
     updateScreen();
 }
 
-std::string Controller::getStringInput()
+std::string Controller::getStringInput(std::string message)
 {
     curs_set(TRUE);
     FIELD *field[2];
@@ -250,7 +251,7 @@ std::string Controller::getStringInput()
     set_form_win(my_form, my_form_win);
     set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
     box(my_form_win, 0, 0);
-    printCenter(my_form_win, "Enter a filename:", 1, cols);
+    printCenter(my_form_win, message, 1, cols);
 	post_form(my_form);
     show_panel(formPanel);
 	updateScreen();
@@ -614,7 +615,7 @@ bool Controller::EditMode()
                 getyx(boardWin, y, x);
                 while(!isFileValid)
                 {
-                    filename = getStringInput();
+                    filename = getStringInput("Enter a filename:");
                     try
                     {
                         pattern = new Pattern(filename);
@@ -726,4 +727,27 @@ void Controller::RenderPattern(std::vector<std::vector<bool>>& matrix)
     }
     wattroff(boardWin, COLOR_PAIR(1));
     wmove(boardWin, y, x);
+}
+
+void Controller::SaveCurrent(bool isPattern)
+{
+    bool shouldSave = GetYesOrNo("Would you like to save?");
+    if(shouldSave)
+    {
+        std::string filename = getStringInput("Enter a filename:");
+        if(isPattern)
+        {
+            filename = "patterns/" + filename;
+        }
+        else
+        {
+            filename = "boards/" + filename;
+        }
+        board->saveState(filename);
+    }
+}
+
+bool Controller::isSaved()
+{
+    return board->getIsSaved();
 }

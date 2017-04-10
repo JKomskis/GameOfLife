@@ -4,7 +4,7 @@
 #include <ctime>
 #include <exception>
 
-bool MainMenu(Controller *controller)
+bool MainMenu(Controller *controller, bool isSaved)
 {
 	std::string filename = "";
 	bool wrapAround = true;
@@ -14,15 +14,19 @@ bool MainMenu(Controller *controller)
 		case -1:
 			return false;
 		case 0:
+			if(!isSaved)
+				controller->SaveCurrent(false);
 			//Create a new blank board
 			wrapAround = controller->GetYesOrNo("Would you like to enable wrap around?");
 			controller->createNewBoard(wrapAround);
 			break;
 		case 1:
 			//Load a saved board
+			if(!isSaved)
+				controller->SaveCurrent(false);
 			while(!isFileValid)
 			{
-				filename = controller->getStringInput();
+				filename = controller->getStringInput("Enter a filename:");
 				try
 				{
 					controller->createNewBoard(filename);
@@ -35,6 +39,8 @@ bool MainMenu(Controller *controller)
 			break;
 		case 2:
 		{
+			if(!isSaved)
+				controller->SaveCurrent(false);
 			//Load a random board
 			wrapAround = controller->GetYesOrNo("Would you like to enable wrap around?");
 			controller->createNewBoard(wrapAround);
@@ -43,9 +49,13 @@ bool MainMenu(Controller *controller)
 			break;
 		}
 		case 3:
+			if(!isSaved)
+				controller->SaveCurrent(false);
 			//Load the pattern editor
 			break;
 		case 4:
+			if(!isSaved)
+				controller->SaveCurrent(false);
 			return true;
 	}
 	controller->setState("Paused");
@@ -67,13 +77,12 @@ int main()
     keypad(stdscr, TRUE);
     Controller *controller = new Controller();
     controller->updateScreen();
-	if(MainMenu(controller))
+	if(MainMenu(controller, true))
 	{
 		endwin();
 		return 0;
 	}
     wchar_t input = 'a';
-    //std::cout << "Printing board." << std::endl;
     controller->updateScreen();
     int count = 0;
     while(controller->getState() == "Paused" || (input = getch()))
@@ -98,7 +107,7 @@ int main()
             controller->setState("Paused");
 			if(controller->EditMode())
 			{
-				if(MainMenu(controller))
+				if(MainMenu(controller, controller->isSaved()))
 				{
 					endwin();
 					return 0;
@@ -108,7 +117,7 @@ int main()
         }
 		else if(input == 27)
 		{
-			if(MainMenu(controller))
+			if(MainMenu(controller, controller->isSaved()))
 			{
 				endwin();
 				return 0;

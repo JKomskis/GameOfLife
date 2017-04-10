@@ -36,10 +36,12 @@ class Controller
         int getSpeed();
         std::string getState();
         double getRatioInput();
-        std::string getStringInput();
+        std::string getStringInput(std::string message);
         int getTermCol();
         int getTermRow();
+        bool isSaved();
         void printCenter(WINDOW *win, std::string str, int row, int width);
+        void SaveCurrent(bool isPattern);
         void setState(std::string newState);
         /*adds the value to the current value of speed. Prevents users from
         decreasing below 1, and exceeding 10000 */

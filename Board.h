@@ -23,6 +23,7 @@ protected:
 	int iterations;
 	int births;
 	int deaths;
+	bool isSaved;
 	//std::string fileName;	<--Do we need this in here????????
 
 public:
@@ -45,6 +46,7 @@ public:
 	int getIterations();
 	int getBirths();
 	int getDeaths();
+	bool getIsSaved();
 
 };
 

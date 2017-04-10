@@ -1,12 +1,6 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <stdlib.h>
-#include "Board.h"
 #include "Formats.h"
-#include "Util.h"
 
-vector<vector<bool>> loadLife(string filename)
+BoardData loadLife(string filename)
 {
 	ifstream in;
 	in.open(filename.c_str());
@@ -18,7 +12,6 @@ vector<vector<bool>> loadLife(string filename)
 	getline(in, line);
 	if (line.compare("#Life 1.05"))
 		throw "Invalid Life 1.05 Header";
-
 	// skip filler lines
 	while(line.size() == 0 || line.at(0) == '#')
 		getline(in, line);
@@ -37,18 +30,17 @@ vector<vector<bool>> loadLife(string filename)
 	in.close();
 
 	// create & apply the data set
-	vector<vector<bool>> matrix(height, vector<bool> (width, 0));
+	BoardData ret = {true, height, width, 0, 0, 0, vector<vector<bool>>(height, vector<bool> (width, 0))};
 	for(int i = 0; i < width; i++)
 		for(int j = 0; j < height; j++)
 			if(boardLines[i].at(j) == '*')
-				matrix[j][i] = true;
-
-	return matrix;
+				ret.matrix[j][i] = true;
+	return ret;
 
 
 }
 
-vector<vector<bool>> loadRLE(string filename)
+BoardData loadRLE(string filename)
 {
 	ifstream in;
 	in.open(filename.c_str());
@@ -56,7 +48,6 @@ vector<vector<bool>> loadRLE(string filename)
 	if (!in.is_open())
 		throw "Error Opening File";
 	string line;
-	//Board ret;
 	int width = 0, height = 0;
 
 
@@ -67,7 +58,7 @@ vector<vector<bool>> loadRLE(string filename)
 			break;
 	// handle first line
 	sscanf(line.c_str(), "x = %d, y = %d%*s", &width, &height);
-	vector<vector<bool>> matrix(height, vector<bool> (width, 0));
+	BoardData ret = {true, height, width, 0, 0, 0, vector<vector<bool>>(height, vector<bool> (width, 0))};
 	int x=0, y=0;
 	while (getline(in, line))
 	{
@@ -110,7 +101,7 @@ vector<vector<bool>> loadRLE(string filename)
 				for (int j = 0; j < count; j++)
 				{
 					if (c == 'o')
-						matrix[y][x] = true;
+						ret.matrix[y][x] = true;
 					x++;
 				}
 				count = 0;
@@ -118,7 +109,7 @@ vector<vector<bool>> loadRLE(string filename)
 			else
 			{
 				if (c == 'o')
-					matrix[y][x] = true;
+					ret.matrix[y][x] = true;
 				x++;
 			}
 		}
@@ -126,10 +117,10 @@ vector<vector<bool>> loadRLE(string filename)
 	}
 	in.close();
 
-	return matrix;
+	return ret;
 }
 
-vector<vector<bool>> loadBRD(string filename)
+BoardData loadBRD(string filename)
 {
 	ifstream in;
 	in.open(filename.c_str());
@@ -143,14 +134,12 @@ vector<vector<bool>> loadBRD(string filename)
 
 	int height = fs_atoi(in);
 	int width = fs_atoi(in);
-
-	//wrapAround = fs_atoi(in);
-	//iterations = fs_atoi(in);
-	//births = fs_atoi(in);
-	//deaths = fs_atoi(in);
-
-	//initialize matrix
-	vector<vector<bool>> matrix(height, vector<bool> (width, 0));
+	bool wrapAround = fs_atoi(in);
+	int iterations = fs_atoi(in);
+	int births = fs_atoi(in);
+	int deaths = fs_atoi(in);
+	BoardData ret = {wrapAround, height, width, iterations,
+		 			births, deaths, vector<vector<bool>>(height, vector<bool> (width, 0))};
 
 	int row = 0;
 	string a;
@@ -159,16 +148,16 @@ vector<vector<bool>> loadBRD(string filename)
 		for(int i = 0; i <width; i++)
 		{
 			a = line[i];
-			matrix[row][i] = atoi(a.c_str());
+			ret.matrix[row][i] = atoi(a.c_str());
 		}
 		row++;
 	}
 
 	in.close();
-	return matrix;
+	return ret;
 }
 
-vector<vector<bool>> loadFormat(string filename)
+BoardData loadFormat(string filename)
 {
 	if      (endsWith(filename, ".life") ||
 			 endsWith(filename, ".lif"))

@@ -4,13 +4,13 @@
 
 #include <string>
 #include <cstdlib>
-#include "Board.h"
-#include <vector>
+//#include "Board.h"
+#include "Util.h"
 
 using namespace std;
 
-vector<vector<bool>> loadLife(string filename);
-vector<vector<bool>> loadRLE(string filename);
-vector<vector<bool>> loadFormat(string filename);
-vector<vector<bool>> loadBRD(string filename);
+BoardData loadLife(string filename);
+BoardData loadRLE(string filename);
+BoardData loadFormat(string filename);
+BoardData loadBRD(string filename);
 #endif /* FORMATS_H_ */

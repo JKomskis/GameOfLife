@@ -20,6 +20,7 @@ Board::Board(bool wrap, int h, int w): matrix(h, vector<bool> (w, 0))
 	this->iterations = 0;
 	this->births = 0;
 	this->deaths = 0;
+	isSaved = true;
 	/*matrix = new bool*[height];
 
 	for (int i = 0; i < height; i++)
@@ -38,16 +39,22 @@ Board::Board(bool wrap, int h, int w): matrix(h, vector<bool> (w, 0))
 
 Board::Board(string filename)
 {
-	matrix = loadFormat(filename);
-	height = sizeof(matrix) / sizeof(matrix[0]);
-	width = sizeof(matrix[0]) / sizeof(bool);
-	wrapAround = true;
+	BoardData data = loadFormat(filename);
+	height = data.height;
+	width = data.width;
+	wrapAround = data.wrapAround;
+	iterations = data.iterations;
+	births = data.births;
+	deaths = data.deaths;
+	isSaved = true;
+	matrix = data.matrix;
 
 }
 
 void Board::toggle(int r, int c)	//toggles the cell from true to false or false to true
 {
 	matrix[r][c] = !matrix[r][c];
+	isSaved = false;
 }
 
 void Board::randomize(double ratio)
@@ -309,6 +316,11 @@ int Board::getBirths()
 int Board::getDeaths()
 {
 	return deaths;
+}
+
+bool Board::getIsSaved()
+{
+	return isSaved;
 }
 
 /*
