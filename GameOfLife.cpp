@@ -4,13 +4,15 @@
 #include <ctime>
 #include <exception>
 
-void MainMenu(Controller *controller)
+bool MainMenu(Controller *controller)
 {
 	std::string filename = "";
 	bool wrapAround = true;
 	bool isFileValid = false;
 	switch( controller->getMainMenuChoice() )
 	{
+		case -1:
+			return false;
 		case 0:
 			//Create a new blank board
 			wrapAround = controller->GetYesOrNo("Would you like to enable wrap around?");
@@ -40,9 +42,12 @@ void MainMenu(Controller *controller)
 		case 3:
 			//Load the pattern editor
 			break;
+		case 4:
+			return true;
 	}
 	controller->setState("Paused");
 	controller->printBoard();
+	return false;
 }
 
 int main()
@@ -59,7 +64,11 @@ int main()
     keypad(stdscr, TRUE);
     Controller *controller = new Controller();
     controller->updateScreen();
-	MainMenu(controller);
+	if(MainMenu(controller))
+	{
+		endwin();
+		return 0;
+	}
     wchar_t input = 'a';
     //std::cout << "Printing board." << std::endl;
     controller->updateScreen();
@@ -86,13 +95,21 @@ int main()
             controller->setState("Paused");
 			if(controller->EditMode())
 			{
-				MainMenu(controller);
+				if(MainMenu(controller))
+				{
+					endwin();
+					return 0;
+				}
 			}
 			controller->setState("Running");
         }
 		else if(input == 27)
 		{
-			MainMenu(controller);
+			if(MainMenu(controller))
+			{
+				endwin();
+				return 0;
+			}
 		}
         //&& is used for an "advance one iteration" when paused
         if(controller->getState() == "Paused")

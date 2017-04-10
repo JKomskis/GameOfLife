@@ -1,6 +1,6 @@
 #include "Controller.h"
 
-#define MAIN_MENU_HEIGHT 7
+#define MAIN_MENU_HEIGHT 8
 #define MAIN_MENU_WIDTH 28
 #define BOARD_HEIGHT (termRow - STATUS_HEIGHT)
 #define BOARD_WIDTH termCol
@@ -17,6 +17,36 @@ Controller::Controller()
     termCol = maxX;
     speed = 1;
     state = "Loading";
+    ITEM **choices = new ITEM*[6];
+    choices[0] = new_item("Load a new board", "Load a new board");
+    choices[1] = new_item("Load a saved board", "Load a saved board");
+    choices[2] = new_item("Load a random board", "Load a random board");
+    choices[3] = new_item("Load the pattern editor", "Load the pattern editor");
+    choices[4] = new_item("Exit", "Exit");
+    choices[5] = NULL;
+	/* Crate menu */
+	mainMenu = new_menu(choices);
+    menu_opts_off(mainMenu, O_NONCYCLIC);
+    menu_opts_off(mainMenu, O_SHOWDESC);
+
+	/* Create the window to be associated with the menu */
+    WINDOW *my_menu_win = newwin(MAIN_MENU_HEIGHT, MAIN_MENU_WIDTH,
+                                    termRow / 2 - MAIN_MENU_HEIGHT / 2, termCol / 2 - MAIN_MENU_WIDTH / 2);
+    keypad(my_menu_win, TRUE);
+    mainMenuPanel = new_panel(my_menu_win);
+
+	/* Set main window and sub window */
+    set_menu_win(mainMenu, my_menu_win);
+    set_menu_sub(mainMenu, derwin(my_menu_win, 5, 25, 2, 1));
+
+	/* Set menu mark to the string " * " */
+    set_menu_mark(mainMenu, ">");
+    printCenter(my_menu_win, "Main Menu", 1, 28);
+	/* Print a border around the main window and print a title */
+    box(my_menu_win, 0, 0);
+	//print_in_middle(my_menu_win, 1, 0, 40, "My Menu", COLOR_PAIR(1));
+	//refresh();
+
 }
 
 void Controller::printCenter(WINDOW *win, std::string str, int row, int width)
@@ -33,65 +63,34 @@ void Controller::updateScreen()
 
 int Controller::getMainMenuChoice()
 {
-    ITEM **choices = new ITEM*[5];
-    choices[0] = new_item("Load a new board", "Load a new board");
-    choices[1] = new_item("Load a saved board", "Load a saved board");
-    choices[2] = new_item("Load a random board", "Load a random board");
-    choices[3] = new_item("Load the pattern editor", "Load the pattern editor");
-    choices[4] = NULL;
-	/* Crate menu */
-	MENU *my_menu = new_menu(choices);
-    menu_opts_off(my_menu, O_NONCYCLIC);
-    menu_opts_off(my_menu, O_SHOWDESC);
-
-	/* Create the window to be associated with the menu */
-    WINDOW *my_menu_win = newwin(MAIN_MENU_HEIGHT, MAIN_MENU_WIDTH,
-                                    termRow / 2 - MAIN_MENU_HEIGHT / 2, termCol / 2 - MAIN_MENU_WIDTH / 2);
-    keypad(my_menu_win, TRUE);
-    PANEL *menuPanel = new_panel(my_menu_win);
-
-	/* Set main window and sub window */
-    set_menu_win(my_menu, my_menu_win);
-    set_menu_sub(my_menu, derwin(my_menu_win, 4, 25, 2, 1));
-
-	/* Set menu mark to the string " * " */
-    set_menu_mark(my_menu, ">");
-    printCenter(my_menu_win, "Main Menu", 1, 28);
-	/* Print a border around the main window and print a title */
-    box(my_menu_win, 0, 0);
-	//print_in_middle(my_menu_win, 1, 0, 40, "My Menu", COLOR_PAIR(1));
-	refresh();
-
 	/* Post the menu */
-	post_menu(my_menu);
-    show_panel(menuPanel);
-	wrefresh(my_menu_win);
+	post_menu(mainMenu);
+    show_panel(mainMenuPanel);
+    WINDOW *mainMenuWin = panel_window(mainMenuPanel);
+	wrefresh(mainMenuWin);
     wchar_t ch;
-	while((ch = wgetch(my_menu_win)) != 10 && ch != 27)
+	while((ch = wgetch(mainMenuWin)) != 10 && ch != 27)
 	{       switch(ch)
 	        {
 				case KEY_DOWN:
-					menu_driver(my_menu, REQ_DOWN_ITEM);
+					menu_driver(mainMenu, REQ_DOWN_ITEM);
 					break;
 				case KEY_UP:
-					menu_driver(my_menu, REQ_UP_ITEM);
+					menu_driver(mainMenu, REQ_UP_ITEM);
 					break;
 				default:
 					break;
 			}
-            wrefresh(my_menu_win);
+            wrefresh(mainMenuWin);
 	}
     int choice = 0;
     if(ch == 27)
         choice = -1;
 	/* Unpost and free all the memory taken up */
     else
-        choice = item_index(current_item(my_menu));
-    unpost_menu(my_menu);
-    free_menu(my_menu);
-    for(int i = 0; i < 5; ++i)
-            free_item(choices[i]);
-    hide_panel(menuPanel);
+        choice = item_index(current_item(mainMenu));
+    unpost_menu(mainMenu);
+    hide_panel(mainMenuPanel);
     updateScreen();
     return choice;
 }

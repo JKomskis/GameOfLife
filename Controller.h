@@ -14,6 +14,7 @@ class Controller
     PANEL *statusPanel = nullptr;
     PANEL *mainMenuPanel = nullptr;
     Board *board = nullptr;
+    MENU* mainMenu;
     int termRow, termCol;
 
     /*Speed is the frequency of iterations, in iterations/s.
