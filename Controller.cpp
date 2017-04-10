@@ -445,6 +445,79 @@ void Controller::GetPatternDimensions(int &height, int &width)
     curs_set(FALSE);
 }
 
+double Controller::getRatioInput()
+{
+    curs_set(TRUE);
+    FIELD *field[2];
+	int rows, cols;
+	field[0] = new_field(1, termCol / 4, 1, 1, 0, 0);
+	field[1] = NULL;
+	set_field_back(field[0], A_UNDERLINE);
+	field_opts_off(field[0], O_AUTOSKIP);
+    field_opts_off(field[0], O_STATIC);
+    set_field_type(field[0], TYPE_NUMERIC, 10, 0, 1);
+    set_max_field(field[0], 10);
+	FORM *my_form = new_form(field);
+	scale_form(my_form, &rows, &cols);
+    WINDOW *my_form_win = newwin(rows + 4, cols + 4, termRow / 2 - (rows + 4) / 2, termCol / 2 - termCol / 8);
+    PANEL *formPanel = new_panel(my_form_win);
+    keypad(my_form_win, TRUE);
+    set_form_win(my_form, my_form_win);
+    set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
+    box(my_form_win, 0, 0);
+    printCenter(my_form_win, "Enter a ratio:", 1, cols);
+	post_form(my_form);
+    show_panel(formPanel);
+	updateScreen();
+    wchar_t ch;
+	/* Loop through to get user requests */
+    bool isValid = false;
+    double ratio = 0;
+	while(!isValid)
+	{
+        ch = wgetch(my_form_win);
+        switch(ch)
+		{
+            case KEY_LEFT:
+			    form_driver(my_form, REQ_PREV_CHAR);
+			    break;
+			case KEY_RIGHT:
+			    form_driver(my_form, REQ_NEXT_CHAR);
+			    break;
+            case KEY_BACKSPACE:
+                form_driver(my_form, REQ_PREV_CHAR);
+                form_driver(my_form, REQ_DEL_CHAR);
+                break;
+            case KEY_DC:
+                form_driver(my_form, REQ_DEL_CHAR);
+                break;
+            case '\n':
+                form_driver(my_form, REQ_VALIDATION);
+                ratio = atof(field_buffer(field[0], 0));
+                if(ratio >= 0 && ratio <= 1)
+                    isValid = true;
+                break;
+			default:
+				form_driver(my_form, ch);
+				break;
+		}
+	}
+    form_driver(my_form, REQ_VALIDATION);
+    ratio = atof(field_buffer(field[0], 0));
+    //while(filename.back() == ' ')
+		//filename.pop_back();
+
+    curs_set(FALSE);
+    unpost_form(my_form);
+	free_form(my_form);
+	free_field(field[0]);
+    hide_panel(formPanel);
+    delwin(my_form_win);
+    del_panel(formPanel);
+    updateScreen();
+    return ratio;
+}
+
 bool Controller::EditMode()
 {
     WINDOW* boardWin = panel_window(boardPanel);

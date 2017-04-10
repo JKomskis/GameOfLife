@@ -34,11 +34,14 @@ bool MainMenu(Controller *controller)
 			}
 			break;
 		case 2:
+		{
 			//Load a random board
 			wrapAround = controller->GetYesOrNo("Would you like to enable wrap around?");
 			controller->createNewBoard(wrapAround);
-			controller->randomizeBoard(0.15);
+			double ratio = controller->getRatioInput();
+			controller->randomizeBoard(ratio);
 			break;
+		}
 		case 3:
 			//Load the pattern editor
 			break;

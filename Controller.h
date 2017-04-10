@@ -35,6 +35,7 @@ class Controller
         void GetPatternDimensions(int &height, int &width);
         int getSpeed();
         std::string getState();
+        double getRatioInput();
         std::string getStringInput();
         int getTermCol();
         int getTermRow();
