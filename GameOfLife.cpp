@@ -58,7 +58,7 @@ bool MainMenu(Controller *controller, bool isSaved)
 				controller->SaveCurrent(false);
 			return true;
 	}
-	controller->setState("Paused");
+	controller->setState(paused);
 	controller->printBoard();
 	return false;
 }
@@ -85,7 +85,7 @@ int main()
     wchar_t input = 'a';
     controller->updateScreen();
     int count = 0;
-    while(controller->getState() == "Paused" || (input = getch()))
+    while(controller->getState() == paused || (input = getch()))
     {
         //std::cout << "Iteration count: " << ++count << std::endl;
 		if(input == '[')
@@ -101,10 +101,10 @@ int main()
             controller->setSpeed(1);
             continue;
         }
-        else if(input == 'p' || controller->getState() == "Paused")
+        else if(input == 'p' || controller->getState() == paused)
         {
             timeout(-1);
-            controller->setState("Paused");
+            controller->setState(paused);
 			if(controller->EditMode())
 			{
 				if(MainMenu(controller, controller->isSaved()))
@@ -113,7 +113,7 @@ int main()
 					return 0;
 				}
 			}
-			controller->setState("Running");
+			controller->setState(running);
         }
 		else if(input == 27)
 		{
@@ -124,7 +124,7 @@ int main()
 			}
 		}
         //&& is used for an "advance one iteration" when paused
-        if(controller->getState() == "Paused")
+        if(controller->getState() == paused)
             continue;
         timeout(1.0/controller->getSpeed() * 1000);
         for (int i = 1; (controller->getSpeed() > 1000) && (i < controller->getSpeed() / 1000); i++) {

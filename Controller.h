@@ -8,6 +8,8 @@
 #include "Formats.h"
 #include "Pattern.h"
 
+enum controlState {menu, running, paused, edit};
+
 class Controller
 {
     PANEL *boardPanel = nullptr;
@@ -21,7 +23,7 @@ class Controller
     The system processes this as the period of iterations, or the delay between
     iterations (in ms).*/
     int speed;
-    std::string state;
+    controlState state;
 
     public:
         Controller();
@@ -34,7 +36,8 @@ class Controller
         int getMainMenuChoice();
         void GetPatternDimensions(int &height, int &width);
         int getSpeed();
-        std::string getState();
+        controlState getState();
+        std::string getStateName();
         double getRatioInput();
         std::string getStringInput(std::string message);
         int getTermCol();
@@ -42,7 +45,7 @@ class Controller
         bool isSaved();
         void printCenter(WINDOW *win, std::string str, int row, int width);
         void SaveCurrent(bool isPattern);
-        void setState(std::string newState);
+        void setState(controlState newState);
         /*adds the value to the current value of speed. Prevents users from
         decreasing below 1, and exceeding 10000 */
         void setSpeed(int newSpeed);

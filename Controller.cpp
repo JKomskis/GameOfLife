@@ -16,7 +16,7 @@ Controller::Controller()
     termRow = maxY;
     termCol = maxX;
     speed = 1;
-    state = "Loading";
+    //state = "Loading";
     ITEM **choices = new ITEM*[6];
     choices[0] = new_item("Load a new board", "Load a new board");
     choices[1] = new_item("Load a saved board", "Load a saved board");
@@ -46,6 +46,7 @@ Controller::Controller()
     box(my_menu_win, 0, 0);
 	//print_in_middle(my_menu_win, 1, 0, 40, "My Menu", COLOR_PAIR(1));
 	//refresh();
+    state = menu;
 
 }
 
@@ -157,12 +158,28 @@ int Controller::getSpeed()
     return speed;
 }
 
-std::string Controller::getState()
+controlState Controller::getState()
 {
     return state;
 }
 
-void Controller::setState(std::string newState)
+std::string Controller::getStateName()
+{
+    switch(state)
+    {
+        case running:
+            return "Running";
+        case paused:
+            return "Paused";
+        case edit:
+            return "Editing";
+        case menu:
+            return "Menu";
+    }
+    return "MENU";
+}
+
+void Controller::setState(controlState newState)
 {
     state = newState;
     updateStatusWin();
@@ -218,7 +235,7 @@ void Controller::updateStatusWin()
     wprintw(statusWin, " x ");
     wprintw(statusWin, "%d", board->getWidth());
     wprintw(statusWin, "\t");
-    wprintw(statusWin, state.c_str());
+    wprintw(statusWin, getStateName().c_str());
     wprintw(statusWin, "\t");
     wprintw(statusWin, "%d", board->getIterations());
     wprintw(statusWin, "\t\t");
@@ -472,9 +489,9 @@ double Controller::getRatioInput()
 	updateScreen();
     wchar_t ch;
 	/* Loop through to get user requests */
-    bool isValid = false;
+    //bool isValid = false;
     double ratio = 0;
-	while(!isValid)
+	while (ch != '\n')
 	{
         ch = wgetch(my_form_win);
         switch(ch)
@@ -495,9 +512,6 @@ double Controller::getRatioInput()
             case '\n':
                 form_driver(my_form, REQ_VALIDATION);
                 ratio = atof(field_buffer(field[0], 0));
-                if(ratio >= 0 && ratio <= 1)
-                    isValid = true;
-                break;
 			default:
 				form_driver(my_form, ch);
 				break;
