@@ -4,10 +4,17 @@
 
 #include <string>
 #include <cstdlib>
+#include <vector>
 //#include "Board.h"
 #include "Util.h"
 
 using namespace std;
+
+
+typedef struct{
+	int x;
+	int y;
+} coords;
 
 BoardData loadLife(string filename);
 BoardData loadRLE(string filename);
