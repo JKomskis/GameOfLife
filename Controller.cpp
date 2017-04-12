@@ -132,7 +132,7 @@ void Controller::createNewBoard(std::string filename)
     delete board;
     wclear(panel_window(boardPanel));
     wclear(panel_window(statusPanel));
-    board = new Board("boards/" + filename);
+    board = new Board("boards" + separator() + filename);
     //while(true){};
     int height = board->getHeight();
     int width = board->getWidth();
@@ -767,7 +767,7 @@ void Controller::EditMode()
                     filename = getStringInput("Enter a filename:");
                     try
                     {
-                        pattern = new Pattern("patterns/" + filename);
+                        pattern = new Pattern("patterns" + separator() + filename);
                         if(pattern->getHeight() > board->getHeight() || pattern->getWidth() > board->getWidth())
                         {
                             throw "Pattern too big!";

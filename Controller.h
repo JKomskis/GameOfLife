@@ -7,6 +7,7 @@
 #include "Board.h"
 #include "Formats.h"
 #include "Pattern.h"
+#include "Util.h"
 
 enum controlState {menu, running, paused, editing, exiting};
 

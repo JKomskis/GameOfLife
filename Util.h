@@ -8,8 +8,11 @@
 //#include <ctime>
 #include <vector>
 
-int fs_atoi(std::ifstream &input);
-bool endsWith(std::string s, std::string ending);
+using namespace std;
+
+int fs_atoi(ifstream &input);
+bool endsWith(string s, string ending);
+string separator();
 
 struct BoardData{
     bool wrapAround;
@@ -18,7 +21,7 @@ struct BoardData{
     int iterations;
     int births;
     int deaths;
-    std::vector<std::vector<bool>> matrix;
+    vector<vector<bool>> matrix;
 };
 
 #endif /* UTIL_H_ */
