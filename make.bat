@@ -2,7 +2,6 @@ set CC=g++
 set CFLAGS=-c -Wall -pedantic -std=c++11
 
 %CC% %CFLAGS% Board.cpp
-%CC% %CFLAGS% GameOfLife.cpp
 %CC% %CFLAGS% Formats.cpp
 %CC% %CFLAGS% Util.cpp
 %CC% %CFLAGS% Pattern.cpp

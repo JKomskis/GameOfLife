@@ -15,7 +15,7 @@ Controller::Controller()
     getmaxyx(stdscr, maxY, maxX);
     termRow = maxY;
     termCol = maxX;
-    speed = 1;
+    speed = 25;
     //state = "Loading";
     ITEM **choices = new ITEM*[6];
     choices[0] = new_item("Load a new board", "Load a new board");
@@ -118,6 +118,32 @@ void Controller::createNewBoard(bool wrapAround)
     updateScreen();
 }
 
+void Controller::createNewBoard(int height, int width)
+{
+    delete board;
+    wclear(panel_window(boardPanel));
+    wclear(panel_window(statusPanel));
+    /*delwin(panel_window(boardPanel));
+    del_panel(boardPanel);
+    delwin(panel_window(statusPanel));
+    del_panel(statusPanel);*/
+    width = (width > 0) ? width:1;
+    width = (width <= BOARD_WIDTH-2) ? width:BOARD_WIDTH-2;
+    height = (height > 0) ? height:1;
+    height = (height <= BOARD_HEIGHT-2) ? height:BOARD_HEIGHT-2;
+    board = new Board(false, height, width);
+    //Create window for the board
+    WINDOW *boardWin = newwin(height+2, width+2, 0, 0);
+    boardPanel = new_panel(boardWin);
+    box(boardWin, 0, 0);
+    //Create window for the bottom status area
+    WINDOW *statusWin = newwin(STATUS_HEIGHT, STATUS_WIDTH, BOARD_HEIGHT, 0);
+    statusPanel = new_panel(statusWin);
+    box(statusWin, 0, 0);
+    updateStatusWin();
+    updateScreen();
+}
+
 void Controller::createNewBoard(std::string filename)
 {
     delete board;
@@ -171,10 +197,12 @@ std::string Controller::getStateName()
             return "Running";
         case paused:
             return "Paused";
-        case edit:
+        case editing:
             return "Editing";
         case menu:
             return "Menu";
+        case exiting:
+            return "Exiting";
     }
     return "MENU";
 }
@@ -533,7 +561,77 @@ double Controller::getRatioInput()
     return ratio;
 }
 
-bool Controller::EditMode()
+int Controller::getIntInput(std::string message)
+{
+    curs_set(TRUE);
+    FIELD *field[2];
+	int rows, cols;
+	field[0] = new_field(1, termCol / 4, 1, 1, 0, 0);
+	field[1] = NULL;
+	set_field_back(field[0], A_UNDERLINE);
+	field_opts_off(field[0], O_AUTOSKIP);
+    field_opts_off(field[0], O_STATIC);
+    set_field_type(field[0], TYPE_NUMERIC, 10, 0, 1);
+    set_max_field(field[0], 10);
+	FORM *my_form = new_form(field);
+	scale_form(my_form, &rows, &cols);
+    WINDOW *my_form_win = newwin(rows + 4, cols + 4, termRow / 2 - (rows + 4) / 2, termCol / 2 - termCol / 8);
+    PANEL *formPanel = new_panel(my_form_win);
+    keypad(my_form_win, TRUE);
+    set_form_win(my_form, my_form_win);
+    set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
+    box(my_form_win, 0, 0);
+    printCenter(my_form_win, message.c_str(), 1, cols);
+	post_form(my_form);
+    show_panel(formPanel);
+	updateScreen();
+    wchar_t ch;
+	/* Loop through to get user requests */
+    //bool isValid = false;
+    int num = 0;
+	while (ch != '\n')
+	{
+        ch = wgetch(my_form_win);
+        switch(ch)
+		{
+            case KEY_LEFT:
+			    form_driver(my_form, REQ_PREV_CHAR);
+			    break;
+			case KEY_RIGHT:
+			    form_driver(my_form, REQ_NEXT_CHAR);
+			    break;
+            case KEY_BACKSPACE:
+                form_driver(my_form, REQ_PREV_CHAR);
+                form_driver(my_form, REQ_DEL_CHAR);
+                break;
+            case KEY_DC:
+                form_driver(my_form, REQ_DEL_CHAR);
+                break;
+            case '\n':
+                form_driver(my_form, REQ_VALIDATION);
+                num = atof(field_buffer(field[0], 0));
+			default:
+				form_driver(my_form, ch);
+				break;
+		}
+	}
+    form_driver(my_form, REQ_VALIDATION);
+    num = atof(field_buffer(field[0], 0));
+    //while(filename.back() == ' ')
+		//filename.pop_back();
+
+    curs_set(FALSE);
+    unpost_form(my_form);
+	free_form(my_form);
+	free_field(field[0]);
+    hide_panel(formPanel);
+    delwin(my_form_win);
+    del_panel(formPanel);
+    updateScreen();
+    return num;
+}
+
+void Controller::EditMode()
 {
     WINDOW* boardWin = panel_window(boardPanel);
     keypad(boardWin, TRUE);
@@ -541,10 +639,13 @@ bool Controller::EditMode()
     getmaxyx(boardWin, maxY, maxX);
     mvwaddch(boardWin, maxY / 2, maxX / 2, winch(boardWin)|A_STANDOUT);
     wmove(boardWin, maxY / 2, maxX / 2);
-	wchar_t input = 'a';
+	wchar_t input = getch();
 	int x = 0, y = 0;
-	while((input = wgetch(boardWin)) != 'p')
-	{
+	//while((input = wgetch(boardWin)) != 'p')
+    while(getState() == paused)
+    {
+        updateScreen();
+        input = getch();
         if( input == KEY_UP || input == KEY_DOWN || input == KEY_LEFT || input == KEY_RIGHT || input == ' ')
         {
             getyx(boardWin, y, x);
@@ -713,16 +814,106 @@ bool Controller::EditMode()
                 printBoard();
                 wmove(boardWin, y, x);
                 break;
+            case 'p':
+                setState(running);
+                break;
             case 10:
                 runIteration();
                 printBoard();
                 break;
             case 27:
-                return true;
+                setState(menu);
                 break;
         }
 	}
-    return false;
+}
+
+void Controller::PatternEditor()
+{
+    WINDOW* boardWin = panel_window(boardPanel);
+    keypad(boardWin, TRUE);
+    int maxX = 0, maxY = 0;
+    getmaxyx(boardWin, maxY, maxX);
+    mvwaddch(boardWin, maxY / 2, maxX / 2, winch(boardWin)|A_STANDOUT);
+    wmove(boardWin, maxY / 2, maxX / 2);
+	wchar_t input;
+    int x = 0, y = 0;
+    while(state == editing)
+    {
+        updateScreen();
+        input = getch();
+        if( input == KEY_UP || input == KEY_DOWN || input == KEY_LEFT || input == KEY_RIGHT || input == ' ')
+        {
+            getyx(boardWin, y, x);
+            waddch(boardWin, char( winch(boardWin) ));
+            wmove(boardWin, y, x);
+        }
+        switch(input)
+        {
+            case KEY_UP:
+                if(y == 1)
+                {
+                    wmove(boardWin, maxY - 2, x);
+                }
+                else
+                {
+                    wmove(boardWin, y-1, x);
+                }
+                getyx(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case KEY_DOWN:
+                if(y == (maxY - 2))
+                {
+                    wmove(boardWin, 1, x);
+                }
+                else
+                {
+                    wmove(boardWin, y+1, x);
+                }
+                getyx(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case KEY_LEFT:
+                if(x == 1)
+                {
+                    wmove(boardWin, y, maxX - 2);
+                }
+                else
+                {
+                    wmove(boardWin, y, x-1);
+                }
+                getyx(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case KEY_RIGHT:
+                if(x == maxX - 2)
+                {
+                    wmove(boardWin, y, 1);
+                }
+                else
+                {
+                    wmove(boardWin, y, x+1);
+                }
+                getyx(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case ' ':
+                board->toggle(y-1, x-1);
+                printBoard();
+                wmove(boardWin, y, x);
+                waddch(boardWin, winch(boardWin)|A_STANDOUT);
+                wmove(boardWin, y, x);
+                break;
+            case 27:
+                setState(menu);
+                break;
+        }
+    }
 }
 
 void Controller::RenderPattern(std::vector<std::vector<bool>>& matrix)

@@ -8,7 +8,7 @@
 #include "Formats.h"
 #include "Pattern.h"
 
-enum controlState {menu, running, paused, edit};
+enum controlState {menu, running, paused, editing, exiting};
 
 class Controller
 {
@@ -28,8 +28,10 @@ class Controller
     public:
         Controller();
         void createNewBoard(bool wrapAround);
+        void createNewBoard(int height, int width);
         void createNewBoard(std::string filename);
-        bool EditMode();
+        void EditMode();
+        void PatternEditor();
         void randomizeBoard(double ratio);
         WINDOW* GetBoardWindow();
         bool GetYesOrNo(std::string dialog);
@@ -39,6 +41,7 @@ class Controller
         controlState getState();
         std::string getStateName();
         double getRatioInput();
+        int getIntInput(std::string message);
         std::string getStringInput(std::string message);
         int getTermCol();
         int getTermRow();
