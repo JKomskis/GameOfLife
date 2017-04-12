@@ -1,6 +1,5 @@
 // ConsoleApplication4.cpp : Defines the entry point for the console application.
 //
-//This is a test
 
 #include <iostream>
 #include <fstream>
@@ -10,6 +9,7 @@
 
 using namespace std;
 
+//a constructor for the Board class if height, width, and wraparound options are chosen
 Board::Board(bool wrap, int h, int w): matrix(h, vector<bool> (w, 0))
 {
 	this->height = h;
@@ -37,6 +37,7 @@ Board::Board(bool wrap, int h, int w): matrix(h, vector<bool> (w, 0))
 	}*/
 }
 
+//a constructor fot the board class if just a filename is given
 Board::Board(string filename)
 {
 	BoardData data = loadFormat(filename);
@@ -57,6 +58,7 @@ void Board::toggle(int r, int c)	//toggles the cell from true to false or false 
 	isSaved = false;
 }
 
+//allows a board to be randomly generated
 void Board::randomize(double ratio)
 {
 	ratio = (ratio < 0) ? 0 : ratio;
@@ -72,6 +74,7 @@ void Board::randomize(double ratio)
 	}
 }
 
+//counts how many live neighbours a given cell has
 int Board::numNeigh(int r,int c)
 {
 	/*creating a count variable, setting it equal to -1 if cell is alive (thus
@@ -97,28 +100,28 @@ int Board::numNeigh(int r,int c)
 		{
 			for (int j = ((c == 0) ? 0: c - 1); j <= ((c == width - 1) ? c:c+1); j++)
 			{
-				//std::cout << "r+i " << r+i << "c+j " << c+j <<std::endl;
+				//std::cout << "r+i " << r+i << "c+j " << c+j <<std::endl;	//for testing purposes
 				if (matrix[i][j])
 					count++;
 			}
 		}
 	}
-	//std::cout << "count:" << count <<endl;
+	//std::cout << "count:" << count <<endl;	//for testing purposes
 	return count;
 }
 
 
-
+//runs one iteration (for example, when the user presses the "Enter" key in the GameOfLife)
 void Board::runIteration()
 {
 
-	int **nMatrix = new int*[height];
+	int **nMatrix = new int*[height];	//creates a new matrix
 
 	for (int i = 0; i < height; i++)
 	{
 		nMatrix[i] = new int[width];
 	}
-	for(int r = 0; r < height; r++)
+	for(int r = 0; r < height; r++)	//gets the numvber of live neighbours
 	{
 		for(int c = 0; c < width; c++)
 		{
@@ -128,7 +131,7 @@ void Board::runIteration()
 		//std::cout << endl;
 	}
 	//std::cout << "Now we are looking at if the cells do what they are supposed to:\n";
-	for(int r = 0; r < height; r++)
+	for(int r = 0; r < height; r++)	//runs logic based on whether or not a cell is alive and how many live neighbours it has
 	{
 		for(int c = 0; c < width; c++)
 		{
@@ -138,13 +141,13 @@ void Board::runIteration()
 				{
 					toggle(r, c);
 					deaths++;
-					//std::cout << "For " << r << ", " << c << " we changed it to a 0 because we had <2: " << nMatrix[r][c] <<endl;
+					//std::cout << "For " << r << ", " << c << " we changed it to a 0 because we had <2: " << nMatrix[r][c] <<endl;	//for testing purposes
 				}
 				else if(nMatrix[r][c] > 3)	//Any live cell with more than three live neighbours dies, as if by overpopulation.
 				{
 					toggle(r, c);
 					deaths++;
-					//std::cout << "For " << r << ", " << c << " we changed it to a 0 because we had >3: " << nMatrix[r][c] << endl;
+					//std::cout << "For " << r << ", " << c << " we changed it to a 0 because we had >3: " << nMatrix[r][c] << endl;	//for testing purposes
 				}
 				//if neither of these is true, the cell stays alive
 			}
@@ -154,12 +157,12 @@ void Board::runIteration()
 				{
 					toggle(r, c);
 					births++;
-					//std::cout << "For " << r << ", " << c << " we changed it to a 1 because we had ==3: " << nMatrix[r][c] << endl;
+					//std::cout << "For " << r << ", " << c << " we changed it to a 1 because we had ==3: " << nMatrix[r][c] << endl;	//for testing purposes
 				}
 			}
 		}
 	}
-	for (int i = 0; i < height; i++)
+	for (int i = 0; i < height; i++)	//delete the matrix that held how many neighbours the cell had (saves space)
 	{
 		delete nMatrix[i];
 	}
@@ -173,17 +176,20 @@ void Board::runIteration(int runs)	//runs the interation the correct number of t
 	for(int i = 0; i < runs; i++)
 	{
 		runIteration();
-		//std::cout << "This is the matrix after " << i + 1 << " iterations.\n";
+		//std::cout << "This is the matrix after " << i + 1 << " iterations.\n";	//for testing purposes
 		//getMatrix();
 		//cout << endl;
 	}
 }
 
+//returns the matrix
 vector<vector<bool>>& Board::getMatrix()
 {
 	return this->matrix;
 }
 
+//prints the board as a matrix of 1s and 0s
+//very useful for testing purposes
 void Board::printBoard()
 {
 	for(int i = 0; i < height; i++)
@@ -196,17 +202,18 @@ void Board::printBoard()
 	}
 }
 
+//save a given state or board, given a name for the file
 void Board::saveState(string fileName)
 {
 	ofstream out(fileName.c_str());
 	out << height << endl;	//first line tells the program the height of the saved matrix
 	out << width << endl;	//second line tells the program the width of the saved matrix
-	out << wrapAround << endl;
-	out << iterations << endl;
-	out << births << endl;
-	out << deaths << endl;
+	out << wrapAround << endl;	//third line tells the program if wrapAround was true or not
+	out << iterations << endl;	//tells the program how many iterations there were
+	out << births << endl;	//how many births there were
+	out << deaths << endl;	//how many deaths there were
 
-	for (int i = 0; i < height; i++)
+	for (int i = 0; i < height; i++)	//tells the program what the matrix actually looked like
 	{
 		for (int j = 0; j < width; j++)
 		{
@@ -217,6 +224,7 @@ void Board::saveState(string fileName)
 	out.close();
 }
 
+//allows the user to add an existing pattern to the board
 void Board::addPattern(string fileName, int x, int y)
 {
 	ifstream in;
