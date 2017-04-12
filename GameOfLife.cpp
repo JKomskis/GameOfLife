@@ -4,7 +4,7 @@
 #include <ctime>
 #include <exception>
 
-void MainMenu(Controller *controller, bool isSaved)
+void MainMenu(Controller *controller)
 {
 	std::string filename = "";
 	bool wrapAround = true;
@@ -13,9 +13,8 @@ void MainMenu(Controller *controller, bool isSaved)
 	{
 		case -1:
 			controller->setState(exiting);
+			break;
 		case 0:
-			if(!isSaved)
-				controller->SaveCurrent(false);
 			//Create a new blank board
 			wrapAround = controller->GetYesOrNo("Would you like to enable wrap around?");
 			controller->createNewBoard(wrapAround);
@@ -24,8 +23,6 @@ void MainMenu(Controller *controller, bool isSaved)
 			break;
 		case 1:
 			//Load a saved board
-			if(!isSaved)
-				controller->SaveCurrent(false);
 			while(!isFileValid)
 			{
 				filename = controller->getStringInput("Enter a filename:");
@@ -43,8 +40,6 @@ void MainMenu(Controller *controller, bool isSaved)
 			break;
 		case 2:
 		{
-			if(!isSaved)
-				controller->SaveCurrent(false);
 			//Load a random board
 			wrapAround = controller->GetYesOrNo("Would you like to enable wrap around?");
 			controller->createNewBoard(wrapAround);
@@ -55,16 +50,12 @@ void MainMenu(Controller *controller, bool isSaved)
 			break;
 		}
 		case 3:
-			if(!isSaved)
-				controller->SaveCurrent(false);
 			//Load the pattern editor
 			controller->createNewBoard(false, controller->getIntInput("Enter height: "), controller->getIntInput("Enter width: "));
 			controller->setState(editing);
 			controller->printBoard();
 			break;
 		case 4:
-			if(!isSaved)
-				controller->SaveCurrent(false);
 			controller->setState(exiting);
 	}
 
@@ -84,7 +75,7 @@ int main()
     keypad(stdscr, TRUE);
     Controller *controller = new Controller();
     controller->updateScreen();
-	MainMenu(controller, true);
+	MainMenu(controller);
     wchar_t input = 'a';
     controller->updateScreen();
 	while (controller->getState() != exiting)
@@ -92,7 +83,7 @@ int main()
 		switch (controller->getState())
 		{
 			case menu:
-				MainMenu(controller, controller->isSaved());
+				MainMenu(controller);
 				break;
 			case running:
 				timeout(1.0/controller->getSpeed() * 1000);
@@ -112,15 +103,15 @@ int main()
 					continue;
 				}
 				else if (input == 27) {
+					if(!controller->isSaved())
+						controller->SaveCurrent();
 					controller->setState(menu);
 				}
 
 				break;
 			case paused:
-				controller->EditMode();
-				break;
 			case editing:
-				controller->PatternEditor();
+				controller->EditMode();
 				break;
 			case exiting:
 				break;

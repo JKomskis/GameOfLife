@@ -27,11 +27,11 @@ class Controller
 
     public:
         Controller();
-        void createNewBoard(bool wrapAround);
         void createNewBoard(bool wrapAround, int height, int width);
+        void createNewBoard(bool wrapAround);
         void createNewBoard(std::string filename);
+
         void EditMode();
-        void PatternEditor();
         void randomizeBoard(double ratio);
         WINDOW* GetBoardWindow();
         bool GetYesOrNo(std::string dialog);
@@ -47,7 +47,7 @@ class Controller
         int getTermRow();
         bool isSaved();
         void printCenter(WINDOW *win, std::string str, int row, int width);
-        void SaveCurrent(bool isPattern);
+        void SaveCurrent();
         void setState(controlState newState);
         /*adds the value to the current value of speed. Prevents users from
         decreasing below 1, and exceeding 10000 */

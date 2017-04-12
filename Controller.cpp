@@ -132,7 +132,7 @@ void Controller::createNewBoard(std::string filename)
     delete board;
     wclear(panel_window(boardPanel));
     wclear(panel_window(statusPanel));
-    board = new Board(filename);
+    board = new Board("boards\\" + filename);
     //while(true){};
     int height = board->getHeight();
     int width = board->getWidth();
@@ -642,7 +642,7 @@ void Controller::EditMode()
 	wchar_t input = getch();
 	int x = 0, y = 0;
 	//while((input = wgetch(boardWin)) != 'p')
-    while(getState() == paused)
+    while(getState() == paused || getState() == editing)
     {
         updateScreen();
         input = getch();
@@ -720,11 +720,18 @@ void Controller::EditMode()
                 waddch(boardWin, winch(boardWin)|A_STANDOUT);
                 wmove(boardWin, y, x);
                 break;
+
             case '[':
-                setSpeed(-1);
+                if (state != editing)
+                    setSpeed(-1);
                 break;
             case ']':
-                setSpeed(1);
+                if (state != editing)
+                    setSpeed(1);
+                break;
+            case 'p':
+                if (state != editing)
+                    setState(running);
                 break;
             case 'a':
                 getyx(boardWin, y, x);
@@ -733,7 +740,7 @@ void Controller::EditMode()
                     filename = getStringInput("Enter a filename:");
                     try
                     {
-                        pattern = new Pattern(filename);
+                        pattern = new Pattern("patterns\\" + filename);
                     }catch(char const*)
                     {
                         continue;
@@ -814,200 +821,17 @@ void Controller::EditMode()
                 printBoard();
                 wmove(boardWin, y, x);
                 break;
-            case 'p':
-                setState(running);
-                break;
             case 10:
                 runIteration();
                 printBoard();
                 break;
             case 27:
+                if(!isSaved())
+                    SaveCurrent();
                 setState(menu);
                 break;
         }
 	}
-}
-
-void Controller::PatternEditor()
-{
-    WINDOW* boardWin = panel_window(boardPanel);
-    keypad(boardWin, TRUE);
-    int maxX = 0, maxY = 0;
-    getmaxyx(boardWin, maxY, maxX);
-    mvwaddch(boardWin, maxY / 2, maxX / 2, winch(boardWin)|A_STANDOUT);
-    wmove(boardWin, maxY / 2, maxX / 2);
-	wchar_t input;
-    int x = 0, y = 0;
-    while(state == editing)
-    {
-        updateScreen();
-        input = getch();
-        if( input == KEY_UP || input == KEY_DOWN || input == KEY_LEFT || input == KEY_RIGHT || input == ' ')
-        {
-            getyx(boardWin, y, x);
-            waddch(boardWin, char( winch(boardWin) ));
-            wmove(boardWin, y, x);
-        }
-        std::string filename = "";
-        bool isFileValid = false;
-        Pattern *pattern = nullptr;
-        std::string layout = "";
-        std::vector<std::vector<bool>> matrix;
-        switch(input)
-        {
-            case KEY_UP:
-                if(y == 1)
-                {
-                    wmove(boardWin, maxY - 2, x);
-                }
-                else
-                {
-                    wmove(boardWin, y-1, x);
-                }
-                getyx(boardWin, y, x);
-                waddch(boardWin, winch(boardWin)|A_STANDOUT);
-                wmove(boardWin, y, x);
-                break;
-            case KEY_DOWN:
-                if(y == (maxY - 2))
-                {
-                    wmove(boardWin, 1, x);
-                }
-                else
-                {
-                    wmove(boardWin, y+1, x);
-                }
-                getyx(boardWin, y, x);
-                waddch(boardWin, winch(boardWin)|A_STANDOUT);
-                wmove(boardWin, y, x);
-                break;
-            case KEY_LEFT:
-                if(x == 1)
-                {
-                    wmove(boardWin, y, maxX - 2);
-                }
-                else
-                {
-                    wmove(boardWin, y, x-1);
-                }
-                getyx(boardWin, y, x);
-                waddch(boardWin, winch(boardWin)|A_STANDOUT);
-                wmove(boardWin, y, x);
-                break;
-            case KEY_RIGHT:
-                if(x == maxX - 2)
-                {
-                    wmove(boardWin, y, 1);
-                }
-                else
-                {
-                    wmove(boardWin, y, x+1);
-                }
-                getyx(boardWin, y, x);
-                waddch(boardWin, winch(boardWin)|A_STANDOUT);
-                wmove(boardWin, y, x);
-                break;
-            //consider making a function for adding the pattern
-            case 'a':
-                    getyx(boardWin, y, x);
-                    while(!isFileValid)
-                    {
-                        filename = getStringInput("Enter a filename:");
-                        try
-                        {
-                            pattern = new Pattern(filename);
-                        }catch(char const*)
-                        {
-                            continue;
-                        }
-                        isFileValid = true;
-                    }
-                    matrix = pattern->getMatrix();
-                    RenderPattern(matrix);
-                    do
-                    {
-                        input = wgetch(boardWin);
-                        getyx(boardWin, y, x);
-                        switch(input)
-                        {
-                            case KEY_UP:
-                                if(y == 1)
-                                {
-                                    wmove(boardWin, maxY - 2, x);
-                                }
-                                else
-                                {
-                                    wmove(boardWin, y-1, x);
-                                }
-                                RenderPattern(matrix);
-                                break;
-                            case KEY_DOWN:
-                                if(y == (maxY - 2))
-                                {
-                                    wmove(boardWin, 1, x);
-                                }
-                                else
-                                {
-                                    wmove(boardWin, y+1, x);
-                                }
-                                RenderPattern(matrix);
-                                break;
-                            case KEY_LEFT:
-                                if(x == 1)
-                                {
-                                    wmove(boardWin, y, maxX - 2);
-                                }
-                                else
-                                {
-                                    wmove(boardWin, y, x-1);
-                                }
-                                RenderPattern(matrix);
-                                break;
-                            case KEY_RIGHT:
-                                if(x == maxX - 2)
-                                {
-                                    wmove(boardWin, y, 1);
-                                }
-                                else
-                                {
-                                    wmove(boardWin, y, x+1);
-                                }
-                                RenderPattern(matrix);
-                                break;
-                            case '\'':
-                                pattern->Rotate();
-                                matrix = pattern->getMatrix();
-                                RenderPattern(matrix);
-                                break;
-                            case ';':
-                                pattern->Rotate();
-                                pattern->Rotate();
-                                pattern->Rotate();
-                                matrix = pattern->getMatrix();
-                                RenderPattern(matrix);
-                                break;
-                            case 10:
-                                board->addPattern(pattern->getMatrix(), y, x);
-                                break;
-                        }
-                    } while(input != 10);
-                    werase(boardWin);
-                    box(boardWin, 0, 0);
-                    printBoard();
-                    wmove(boardWin, y, x);
-                    break;
-            case ' ':
-                board->toggle(y-1, x-1);
-                printBoard();
-                wmove(boardWin, y, x);
-                waddch(boardWin, winch(boardWin)|A_STANDOUT);
-                wmove(boardWin, y, x);
-                break;
-            case 27:
-                setState(menu);
-                break;
-        }
-    }
 }
 
 void Controller::RenderPattern(std::vector<std::vector<bool>>& matrix)
@@ -1028,19 +852,19 @@ void Controller::RenderPattern(std::vector<std::vector<bool>>& matrix)
     wmove(boardWin, y, x);
 }
 
-void Controller::SaveCurrent(bool isPattern)
+void Controller::SaveCurrent()
 {
     bool shouldSave = GetYesOrNo("Would you like to save?");
     if(shouldSave)
     {
         std::string filename = getStringInput("Enter a filename:");
-        if(isPattern)
+        if(state == editing)
         {
-            filename = "patterns/" + filename;
+            filename = "patterns\\" + filename;
         }
         else
         {
-            filename = "boards/" + filename;
+            filename = "boards\\" + filename;
         }
         board->saveState(filename);
     }
