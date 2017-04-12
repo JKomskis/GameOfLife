@@ -2,8 +2,8 @@
 #include <panel.h>
 #include <form.h>
 #include <menu.h>
-#include <string>
-#include <vector>
+//#include <string>
+//#include <vector>
 #include "Board.h"
 #include "Formats.h"
 #include "Pattern.h"
@@ -30,7 +30,7 @@ class Controller
         void createNewBoard(bool wrapAround, int height, int width);
         void createNewBoard(bool wrapAround);
         void createNewBoard(std::string filename);
-
+        void ConfirmationBox(std::string dialog);
         void EditMode();
         void randomizeBoard(double ratio);
         WINDOW* GetBoardWindow();

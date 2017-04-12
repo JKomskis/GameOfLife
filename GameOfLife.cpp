@@ -29,8 +29,9 @@ void MainMenu(Controller *controller)
 				try
 				{
 					controller->createNewBoard(filename);
-				}catch(char const*)
+				}catch(char const* message)
 				{
+					controller->ConfirmationBox(message);
 					continue;
 				}
 				isFileValid = true;
@@ -50,11 +51,16 @@ void MainMenu(Controller *controller)
 			break;
 		}
 		case 3:
+		{
 			//Load the pattern editor
-			controller->createNewBoard(false, controller->getIntInput("Enter height: "), controller->getIntInput("Enter width: "));
+			int height = 0;
+			int width = 0;
+			controller->GetPatternDimensions(height, width);
+			controller->createNewBoard(false, height, width);
 			controller->setState(editing);
 			controller->printBoard();
 			break;
+		}
 		case 4:
 			controller->setState(exiting);
 	}

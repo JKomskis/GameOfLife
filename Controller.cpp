@@ -132,10 +132,14 @@ void Controller::createNewBoard(std::string filename)
     delete board;
     wclear(panel_window(boardPanel));
     wclear(panel_window(statusPanel));
-    board = new Board("boards\\" + filename);
+    board = new Board("boards/" + filename);
     //while(true){};
     int height = board->getHeight();
     int width = board->getWidth();
+    if(height > BOARD_HEIGHT || width > BOARD_WIDTH)
+    {
+        throw "Board is too big!";
+    }
     //TODO: test loading with files larger than terminal.
     width = (width > 0) ? width:1;
     width = (width <= BOARD_WIDTH-2) ? width:BOARD_WIDTH-2;
@@ -307,6 +311,7 @@ std::string Controller::getStringInput(std::string message)
 			case KEY_RIGHT:
 			    form_driver(my_form, REQ_NEXT_CHAR);
 			    break;
+            case '\b':
             case KEY_BACKSPACE:
                 form_driver(my_form, REQ_PREV_CHAR);
                 form_driver(my_form, REQ_DEL_CHAR);
@@ -419,6 +424,25 @@ bool Controller::GetYesOrNo(std::string dialog)
     return yesSelected;
 }
 
+void Controller::ConfirmationBox(std::string dialog)
+{
+    WINDOW *dialogWin = newwin(5, dialog.size() + 4, termRow / 2 - 3, termCol / 2 - (dialog.size() + 4) / 2);
+    keypad(dialogWin, TRUE);
+    PANEL *dialogPanel = new_panel(dialogWin);
+    box(dialogWin, 0, 0);
+    mvwprintw(dialogWin, 1, 2, dialog.c_str());
+    wattron(dialogWin, A_STANDOUT);
+    mvwprintw(dialogWin, 3, (dialog.size() + 4) / 2 - 2, "<OK>");
+    show_panel(dialogPanel);
+    updateScreen();
+    wgetch(dialogWin);
+    curs_set(FALSE);
+    hide_panel(dialogPanel);
+    delwin(dialogWin);
+    del_panel(dialogPanel);
+    updateScreen();
+}
+
 void Controller::GetPatternDimensions(int &height, int &width)
 {
     curs_set(TRUE);
@@ -465,6 +489,7 @@ void Controller::GetPatternDimensions(int &height, int &width)
             case KEY_RIGHT:
                 form_driver(form, REQ_NEXT_FIELD);
                 break;
+            case '\b':
             case KEY_BACKSPACE:
                 form_driver(form, REQ_PREV_CHAR);
                 form_driver(form, REQ_DEL_CHAR);
@@ -530,6 +555,7 @@ double Controller::getRatioInput()
 			case KEY_RIGHT:
 			    form_driver(my_form, REQ_NEXT_CHAR);
 			    break;
+            case '\b':
             case KEY_BACKSPACE:
                 form_driver(my_form, REQ_PREV_CHAR);
                 form_driver(my_form, REQ_DEL_CHAR);
@@ -600,6 +626,7 @@ int Controller::getIntInput(std::string message)
 			case KEY_RIGHT:
 			    form_driver(my_form, REQ_NEXT_CHAR);
 			    break;
+            case '\b':
             case KEY_BACKSPACE:
                 form_driver(my_form, REQ_PREV_CHAR);
                 form_driver(my_form, REQ_DEL_CHAR);
@@ -740,9 +767,14 @@ void Controller::EditMode()
                     filename = getStringInput("Enter a filename:");
                     try
                     {
-                        pattern = new Pattern("patterns\\" + filename);
-                    }catch(char const*)
+                        pattern = new Pattern("patterns/" + filename);
+                        if(pattern->getHeight() > board->getHeight() || pattern->getWidth() > board->getWidth())
+                        {
+                            throw "Pattern too big!";
+                        }
+                    }catch(char const* message)
                     {
+                        ConfirmationBox(message);
                         continue;
                     }
                     isFileValid = true;
@@ -860,11 +892,11 @@ void Controller::SaveCurrent()
         std::string filename = getStringInput("Enter a filename:");
         if(state == editing)
         {
-            filename = "patterns\\" + filename;
+            filename = "patterns/" + filename;
         }
         else
         {
-            filename = "boards\\" + filename;
+            filename = "boards/" + filename;
         }
         board->saveState(filename);
     }

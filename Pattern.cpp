@@ -6,7 +6,7 @@
  */
 
 #include <fstream>
-#include <string>
+//#include <string>
 #include <iostream>
 #include "Pattern.h"
 

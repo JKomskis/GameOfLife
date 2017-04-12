@@ -61,7 +61,7 @@ BoardData loadLife(string filename)
 	//for(int i = 0; i < (int)toggleList.size(); i++)
 	for(auto xy : toggleList)
 		ret.matrix[xy.y][xy.x] = true;
-	
+
 	return ret;
 
 
@@ -153,9 +153,7 @@ BoardData loadBRD(string filename)
 	in.open(filename.c_str());
 
 	if (!in.is_open())
-	{
-		cerr << "File not opened '" << filename << "'" << endl;
-	}
+		throw "Error Opening File";
 
 	string line;
 

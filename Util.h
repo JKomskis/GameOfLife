@@ -3,9 +3,9 @@
 
 #include <iostream>
 #include <fstream>
-#include <string>
+//#include <string>
 #include <stdlib.h>
-#include <ctime>
+//#include <ctime>
 #include <vector>
 
 int fs_atoi(std::ifstream &input);
