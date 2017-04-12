@@ -28,7 +28,7 @@ class Controller
     public:
         Controller();
         void createNewBoard(bool wrapAround);
-        void createNewBoard(int height, int width);
+        void createNewBoard(bool wrapAround, int height, int width);
         void createNewBoard(std::string filename);
         void EditMode();
         void PatternEditor();

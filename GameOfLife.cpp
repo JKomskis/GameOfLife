@@ -58,7 +58,7 @@ void MainMenu(Controller *controller, bool isSaved)
 			if(!isSaved)
 				controller->SaveCurrent(false);
 			//Load the pattern editor
-			controller->createNewBoard(controller->getIntInput("Enter the height of your pattern: "), controller->getIntInput("Enter the width of your pattern: "));
+			controller->createNewBoard(false, controller->getIntInput("Enter height: "), controller->getIntInput("Enter width: "));
 			controller->setState(editing);
 			controller->printBoard();
 			break;

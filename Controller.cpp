@@ -96,29 +96,11 @@ int Controller::getMainMenuChoice()
     return choice;
 }
 
-void Controller::createNewBoard(bool wrapAround)
-{
-    delete board;
-    wclear(panel_window(boardPanel));
-    wclear(panel_window(statusPanel));
-    /*delwin(panel_window(boardPanel));
-    del_panel(boardPanel);
-    delwin(panel_window(statusPanel));
-    del_panel(statusPanel);*/
-    board = new Board(wrapAround, BOARD_HEIGHT - 2, BOARD_WIDTH - 2);
-    //Create window for the board
-    WINDOW *boardWin = newwin(BOARD_HEIGHT, BOARD_WIDTH, 0, 0);
-    boardPanel = new_panel(boardWin);
-    box(boardWin, 0, 0);
-    //Create window for the bottom status area
-    WINDOW *statusWin = newwin(STATUS_HEIGHT, STATUS_WIDTH, BOARD_HEIGHT, 0);
-    statusPanel = new_panel(statusWin);
-    box(statusWin, 0, 0);
-    updateStatusWin();
-    updateScreen();
+void Controller::createNewBoard(bool wrapAround) {
+    createNewBoard(wrapAround, BOARD_HEIGHT, BOARD_WIDTH);
 }
 
-void Controller::createNewBoard(int height, int width)
+void Controller::createNewBoard(bool wrapAround, int height, int width)
 {
     delete board;
     wclear(panel_window(boardPanel));
@@ -127,13 +109,14 @@ void Controller::createNewBoard(int height, int width)
     del_panel(boardPanel);
     delwin(panel_window(statusPanel));
     del_panel(statusPanel);*/
+
     width = (width > 0) ? width:1;
     width = (width <= BOARD_WIDTH-2) ? width:BOARD_WIDTH-2;
     height = (height > 0) ? height:1;
     height = (height <= BOARD_HEIGHT-2) ? height:BOARD_HEIGHT-2;
-    board = new Board(false, height, width);
+    board = new Board(wrapAround, height, width);
     //Create window for the board
-    WINDOW *boardWin = newwin(height+2, width+2, 0, 0);
+    WINDOW *boardWin = newwin(height+2, width+2, (BOARD_HEIGHT-height)/2-1, (BOARD_WIDTH-width)/2-1);
     boardPanel = new_panel(boardWin);
     box(boardWin, 0, 0);
     //Create window for the bottom status area
@@ -153,7 +136,12 @@ void Controller::createNewBoard(std::string filename)
     //while(true){};
     int height = board->getHeight();
     int width = board->getWidth();
-    WINDOW *boardWin = newwin(height + 2, width + 2, 0, 0);
+    //TODO: test loading with files larger than terminal.
+    width = (width > 0) ? width:1;
+    width = (width <= BOARD_WIDTH-2) ? width:BOARD_WIDTH-2;
+    height = (height > 0) ? height:1;
+    height = (height <= BOARD_HEIGHT-2) ? height:BOARD_HEIGHT-2;
+    WINDOW *boardWin = newwin(height+2, width+2, (BOARD_HEIGHT-height)/2-1, (BOARD_WIDTH-width)/2-1);
     boardPanel = new_panel(boardWin);
     box(boardWin, 0, 0);
     //Create window for the bottom status area
@@ -258,22 +246,29 @@ void Controller::updateStatusWin()
     WINDOW* statusWin = panel_window(statusPanel);
     werase(statusWin);
     box(statusWin, 0, 0);
-    mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tIterations:\tBirths:\tDeaths:\tSpeed:");
+    if (state == editing)
+        mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:");
+    else
+        mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tIterations:\tBirths:\tDeaths:\tSpeed:");
     mvwprintw(statusWin, 3, 1, "%02d", board->getHeight());
     wprintw(statusWin, " x ");
     wprintw(statusWin, "%d", board->getWidth());
     wprintw(statusWin, "\t");
     wprintw(statusWin, getStateName().c_str());
     wprintw(statusWin, "\t");
-    wprintw(statusWin, "%d", board->getIterations());
-    wprintw(statusWin, "\t\t");
-    wprintw(statusWin, "%d", board->getBirths());
-    wprintw(statusWin, "\t");
-    wprintw(statusWin, "%d", board->getDeaths());
-    wprintw(statusWin, "\t");
-    /*speed variable is in iterations/second... make sure it is presented that
-    way to the user (i.e. don't divide by 1000 or anything) */
-    wprintw(statusWin, "%d", speed);
+    if (state != editing)
+    {
+        wprintw(statusWin, "%d", board->getIterations());
+        wprintw(statusWin, "\t\t");
+        wprintw(statusWin, "%d", board->getBirths());
+        wprintw(statusWin, "\t");
+        wprintw(statusWin, "%d", board->getDeaths());
+        wprintw(statusWin, "\t");
+
+        /*speed variable is in iterations/second... make sure it is presented that
+        way to the user (i.e. don't divide by 1000 or anything) */
+        wprintw(statusWin, "%d", speed);
+    }
     updateScreen();
 }
 
@@ -416,6 +411,11 @@ bool Controller::GetYesOrNo(std::string dialog)
 		}
         wrefresh(dialogWin);
 	}
+    curs_set(FALSE);
+    hide_panel(dialogPanel);
+    delwin(dialogWin);
+    del_panel(dialogPanel);
+    updateScreen();
     return yesSelected;
 }
 
@@ -848,6 +848,11 @@ void Controller::PatternEditor()
             waddch(boardWin, char( winch(boardWin) ));
             wmove(boardWin, y, x);
         }
+        std::string filename = "";
+        bool isFileValid = false;
+        Pattern *pattern = nullptr;
+        std::string layout = "";
+        std::vector<std::vector<bool>> matrix;
         switch(input)
         {
             case KEY_UP:
@@ -902,6 +907,95 @@ void Controller::PatternEditor()
                 waddch(boardWin, winch(boardWin)|A_STANDOUT);
                 wmove(boardWin, y, x);
                 break;
+            //consider making a function for adding the pattern
+            case 'a':
+                    getyx(boardWin, y, x);
+                    while(!isFileValid)
+                    {
+                        filename = getStringInput("Enter a filename:");
+                        try
+                        {
+                            pattern = new Pattern(filename);
+                        }catch(char const*)
+                        {
+                            continue;
+                        }
+                        isFileValid = true;
+                    }
+                    matrix = pattern->getMatrix();
+                    RenderPattern(matrix);
+                    do
+                    {
+                        input = wgetch(boardWin);
+                        getyx(boardWin, y, x);
+                        switch(input)
+                        {
+                            case KEY_UP:
+                                if(y == 1)
+                                {
+                                    wmove(boardWin, maxY - 2, x);
+                                }
+                                else
+                                {
+                                    wmove(boardWin, y-1, x);
+                                }
+                                RenderPattern(matrix);
+                                break;
+                            case KEY_DOWN:
+                                if(y == (maxY - 2))
+                                {
+                                    wmove(boardWin, 1, x);
+                                }
+                                else
+                                {
+                                    wmove(boardWin, y+1, x);
+                                }
+                                RenderPattern(matrix);
+                                break;
+                            case KEY_LEFT:
+                                if(x == 1)
+                                {
+                                    wmove(boardWin, y, maxX - 2);
+                                }
+                                else
+                                {
+                                    wmove(boardWin, y, x-1);
+                                }
+                                RenderPattern(matrix);
+                                break;
+                            case KEY_RIGHT:
+                                if(x == maxX - 2)
+                                {
+                                    wmove(boardWin, y, 1);
+                                }
+                                else
+                                {
+                                    wmove(boardWin, y, x+1);
+                                }
+                                RenderPattern(matrix);
+                                break;
+                            case '\'':
+                                pattern->Rotate();
+                                matrix = pattern->getMatrix();
+                                RenderPattern(matrix);
+                                break;
+                            case ';':
+                                pattern->Rotate();
+                                pattern->Rotate();
+                                pattern->Rotate();
+                                matrix = pattern->getMatrix();
+                                RenderPattern(matrix);
+                                break;
+                            case 10:
+                                board->addPattern(pattern->getMatrix(), y, x);
+                                break;
+                        }
+                    } while(input != 10);
+                    werase(boardWin);
+                    box(boardWin, 0, 0);
+                    printBoard();
+                    wmove(boardWin, y, x);
+                    break;
             case ' ':
                 board->toggle(y-1, x-1);
                 printBoard();
