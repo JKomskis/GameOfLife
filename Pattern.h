@@ -20,7 +20,6 @@ public:
 	int getHeight();
 	int getWidth();
 	vector<vector<bool>> getMatrix();
-	void trim();
 
 };
 

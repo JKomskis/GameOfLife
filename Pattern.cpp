@@ -83,51 +83,6 @@ std::vector<std::vector<bool>> Pattern::getMatrix()
 {
 	return Board::getMatrix();
 }
-
-void Pattern::trim()
-{
-	unsigned int row = 0;
-	unsigned int column = 0;
-	for (unsigned int r = 0; r < matrix.size(); r++)
-	{
-		for (unsigned int c = 0; c < matrix[0].size(); c++)
-		{
-			if (matrix[r][c])
-			{
-				row = r;
-				column = c;
-				break;
-			}
-		}
-	}
-	unsigned int endRow = 0;
-	unsigned int endColumn = 0;
-	for (unsigned int r = matrix.size() -1 ; r >= 0; r--)
-	{
-		for (unsigned int c = matrix[0].size(); c >= 0; c--)
-		{
-			if (matrix[r][c])
-			{
-				endRow = r;
-				endColumn = c;
-				break;
-			}
-		}
-	}
-	vector<vector<bool>> newMatrix;
-	for (unsigned int r = row; r <= endRow; r++)
-	{
-		vector<bool> temp;
-		for (unsigned int c = column; c <= endColumn; c++)
-		{
-			temp.push_back(matrix[r][c]);
-		}
-		newMatrix.push_back(temp);
-	}
-	//delete matrix;
-	matrix = newMatrix;
-
-}
 //For testing purposes
 /*
 int main() {
