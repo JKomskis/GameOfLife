@@ -254,9 +254,9 @@ void Controller::updateStatusWin()
         mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:");
     else
         mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tIterations:\tBirths:\tDeaths:\tSpeed:");
-    mvwprintw(statusWin, 3, 1, "%02d", board->getHeight());
+    mvwprintw(statusWin, 3, 1, "%-3d", board->getHeight());
     wprintw(statusWin, " x ");
-    wprintw(statusWin, "%d", board->getWidth());
+    wprintw(statusWin, "%-3d", board->getWidth());
     wprintw(statusWin, "\t");
     wprintw(statusWin, getStateName().c_str());
     wprintw(statusWin, "\t");
@@ -273,6 +273,7 @@ void Controller::updateStatusWin()
         way to the user (i.e. don't divide by 1000 or anything) */
         wprintw(statusWin, "%d", speed);
     }
+    mvwprintw(statusWin, 2, STATUS_WIDTH-15, "K: Keybindings");
     updateScreen();
 }
 
@@ -443,6 +444,25 @@ void Controller::ConfirmationBox(std::string dialog)
     updateScreen();
 }
 
+/*void Controller::KeybindingsBox()
+{
+    WINDOW *dialogWin = newwin(15, dialog.size() + 4, termRow / 2 - 3, termCol / 2 - (dialog.size() + 4) / 2);
+    keypad(dialogWin, TRUE);
+    PANEL *dialogPanel = new_panel(dialogWin);
+    box(dialogWin, 0, 0);
+    mvwprintw(dialogWin, 1, 1, "");
+    mvwprintw(dialogWin, 2, 1, "");
+    mvwprintw(dialogWin, 3, 1, "");
+    show_panel(dialogPanel);
+    updateScreen();
+    wgetch(dialogWin);
+    curs_set(FALSE);
+    hide_panel(dialogPanel);
+    delwin(dialogWin);
+    del_panel(dialogPanel);
+    updateScreen();
+}*/
+
 void Controller::GetPatternDimensions(int &height, int &width)
 {
     curs_set(TRUE);
@@ -504,6 +524,16 @@ void Controller::GetPatternDimensions(int &height, int &width)
                 {
                     height = heightInput;
                     width = widthInput;
+                    unpost_form(form);
+                    free_form(form);
+                    for(int i = 0; i < 4; ++i)
+                    {
+                        free_field(field[i]);
+                    }
+                    hide_panel(formPanel);
+                    delwin(formWin);
+                    del_panel(formPanel);
+                    updateScreen();
                     return;
                 }
                 form_driver(form, REQ_NEXT_FIELD);
