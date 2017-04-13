@@ -129,9 +129,6 @@ void Controller::createNewBoard(bool wrapAround, int height, int width)
 
 void Controller::createNewBoard(std::string filename)
 {
-    delete board;
-    wclear(panel_window(boardPanel));
-    wclear(panel_window(statusPanel));
     board = new Board("boards" + separator() + filename);
     //while(true){};
     int height = board->getHeight();
@@ -140,6 +137,9 @@ void Controller::createNewBoard(std::string filename)
     {
         throw "Board is too big!";
     }
+    delete board;
+    wclear(panel_window(boardPanel));
+    wclear(panel_window(statusPanel));
     //TODO: test loading with files larger than terminal.
     width = (width > 0) ? width:1;
     width = (width <= BOARD_WIDTH-2) ? width:BOARD_WIDTH-2;
@@ -484,9 +484,8 @@ void Controller::GetPatternDimensions(int &height, int &width)
         switch(ch)
         {
             case KEY_LEFT:
-                form_driver(form, REQ_PREV_FIELD);
-                break;
             case KEY_RIGHT:
+            case '\t':
                 form_driver(form, REQ_NEXT_FIELD);
                 break;
             case '\b':
@@ -507,6 +506,7 @@ void Controller::GetPatternDimensions(int &height, int &width)
                     width = widthInput;
                     return;
                 }
+                form_driver(form, REQ_NEXT_FIELD);
                 break;
             default:
                 form_driver(form, ch);
