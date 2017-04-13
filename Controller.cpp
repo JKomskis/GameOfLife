@@ -102,9 +102,12 @@ void Controller::createNewBoard(bool wrapAround) {
 
 void Controller::createNewBoard(bool wrapAround, int height, int width)
 {
-    delete board;
-    wclear(panel_window(boardPanel));
-    wclear(panel_window(statusPanel));
+    if(board != nullptr){
+        delete board;
+        board = nullptr;
+        wclear(panel_window(boardPanel));
+        wclear(panel_window(statusPanel));
+    }
     /*delwin(panel_window(boardPanel));
     del_panel(boardPanel);
     delwin(panel_window(statusPanel));
@@ -129,17 +132,20 @@ void Controller::createNewBoard(bool wrapAround, int height, int width)
 
 void Controller::createNewBoard(std::string filename)
 {
+    if(board != nullptr){
+        delete board;
+        board = nullptr;
+        wclear(panel_window(boardPanel));
+        wclear(panel_window(statusPanel));
+    }
     board = new Board("boards" + separator() + filename);
-    //while(true){};
     int height = board->getHeight();
     int width = board->getWidth();
     if(height > BOARD_HEIGHT || width > BOARD_WIDTH)
     {
         throw "Board is too big!";
     }
-    delete board;
-    wclear(panel_window(boardPanel));
-    wclear(panel_window(statusPanel));
+
     //TODO: test loading with files larger than terminal.
     width = (width > 0) ? width:1;
     width = (width <= BOARD_WIDTH-2) ? width:BOARD_WIDTH-2;
