@@ -224,7 +224,7 @@ void Board::saveState(string fileName)
 	out.close();
 }
 
-//allows the user to add an existing pattern to the board
+//allows the user to add an existing pattern to the board by calling with the filename, along with an x and y position
 void Board::addPattern(string fileName, int x, int y)
 {
 	ifstream in;
@@ -290,6 +290,7 @@ void Board::addPattern(string fileName, int x, int y)
 
 }
 
+//allows the user to add an existing pattern to the board by calling with the actual bool matrix, along with an x and y position
 void Board::addPattern(vector<vector<bool>> patternMatrix, int y, int x)
 {
 	for(size_t i = 0; i < patternMatrix.size(); i++)
@@ -301,36 +302,43 @@ void Board::addPattern(vector<vector<bool>> patternMatrix, int y, int x)
 	}
 }
 
+//returns the height of the board
 int Board::getHeight()
 {
 	return height;
 }
 
+//returns the width of the board
 int Board::getWidth()
 {
 	return width;
 }
 
+//returns the number of iterations that were run
 int Board::getIterations()
 {
 	return iterations;
 }
 
+//returns the number of births that occurred
 int Board::getBirths()
 {
 	return this->births;
 }
 
+//returns the number of deaths that occurred
 int Board::getDeaths()
 {
 	return deaths;
 }
 
+//returns a boolean value of if the board has been saved
 bool Board::getIsSaved()
 {
 	return isSaved;
 }
 
+//Used for testing purposes
 /*
 int main()
 {
