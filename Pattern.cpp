@@ -10,6 +10,7 @@
 #include <iostream>
 #include "Pattern.h"
 
+//Constructor for the Pattern class
 Pattern::Pattern(std::string filename):Board(filename)
 {
 	/*ifstream in;
@@ -51,6 +52,7 @@ Pattern::Pattern(std::string filename):Board(filename)
 	}*/
 }
 
+//Rotates a pattern by 90 degrees counter clockwise
 void Pattern::Rotate()
 {
 	vector<vector<bool>> patternCopy(matrix[0].size(), vector<bool> (matrix.size(), 0));
@@ -64,21 +66,25 @@ void Pattern::Rotate()
 	matrix = patternCopy;
 }
 
+//returns the height of the board
 int Pattern::getHeight()
 {
 	return Board::getHeight();
 }
 
+//returns the width of the board
 int Pattern::getWidth()
 {
 	return Board::getHeight();
 }
 
+//returns the board matrix
 std::vector<std::vector<bool>> Pattern::getMatrix()
 {
 	return Board::getMatrix();
 }
 
+//For testing purposes
 /*int main() {
 	Pattern *test = new Pattern("rlepack/gosperglidergun.rle");
 	//std::vector<std::vector<bool>> matrix = loadFormat("rlepack/gosperglidergun.rle");
