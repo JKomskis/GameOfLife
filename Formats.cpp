@@ -3,7 +3,7 @@
 BoardData loadLife(string filename)
 {
 	ifstream in;
-	in.open(filename.c_str());
+	in.open(filename);
 
 	if (!in.is_open())
 		throw "Error Opening File";
@@ -73,7 +73,7 @@ BoardData loadLife(string filename)
 BoardData loadRLE(string filename)
 {
 	ifstream in;
-	in.open(filename.c_str());
+	in.open(filename);
 
 	if (!in.is_open())
 		throw "Error Opening File";
@@ -88,7 +88,7 @@ BoardData loadRLE(string filename)
 			break;
 	// handle first line
 	sscanf(line.c_str(), "x = %d, y = %d%*s", &width, &height);
-	set<int> birthRule = {2,};
+	set<int> birthRule = {3,};
 	set<int> survivalRule = {2, 3,};
 	BoardData ret = {true, height, width, 0, 0, 0,
 		birthRule, survivalRule,
@@ -98,7 +98,6 @@ BoardData loadRLE(string filename)
 	{
 		if (line.at(0) == '#')
 			continue;
-		//cout << "LINE: " << line << endl;
 		int count = 0;
 		for (int i = 0; i < (int)line.length(); i++)
 		{
@@ -129,7 +128,7 @@ BoardData loadRLE(string filename)
 				break;
 			}
 
-			// ok, actually print
+			// apply the alive or dead cell
 			if (count)
 			{
 				for (int j = 0; j < count; j++)
@@ -157,7 +156,7 @@ BoardData loadRLE(string filename)
 BoardData loadBRD(string filename)
 {
 	ifstream in;
-	in.open(filename.c_str());
+	in.open(filename);
 
 	if (!in.is_open())
 		throw "Error Opening File";
@@ -173,11 +172,9 @@ BoardData loadBRD(string filename)
 	set<int> birthRule;
 	set<int> survivalRule;
 	getline(in, line);
-	for(auto c : line)
-		birthRule.insert(atoi((const char*)&c));
+	birthRule = rule2set(line);
 	getline(in, line);
-	for(auto c : line)
-		survivalRule.insert(atoi((const char*)&c));
+	survivalRule = rule2set(line);
 
 	BoardData ret = {wrapAround, height, width, iterations,
 					births, deaths, birthRule, survivalRule,
@@ -218,9 +215,8 @@ BoardData loadFormat(string filename)
 /*
 int main( int argc, char* args[] )
 {
-	BoardData test = loadFormat("boards/smile.brd");
-	//test->printBoard();
-	cout << endl;
+	Board *test = new Board("boards/smile.brd");
+	test->printBoard();
 
 	return 0;
 }

@@ -187,19 +187,23 @@ void Board::printBoard()
 		}
 		cout << endl;
 	}
+	cout << "Birth Rule: " << set2rule(birthRule) << endl;
+	cout << "Survival Rule: " << set2rule(survivalRule) << endl;
+	cout << endl;
 }
 
 //save a given state or board, given a name for the file
 void Board::saveState(string fileName)
 {
-	ofstream out(fileName.c_str());
+	ofstream out(fileName);
 	out << height << endl;	//first line tells the program the height of the saved matrix
 	out << width << endl;	//second line tells the program the width of the saved matrix
 	out << wrapAround << endl;	//third line tells the program if wrapAround was true or not
 	out << iterations << endl;	//tells the program how many iterations there were
 	out << births << endl;	//how many births there were
 	out << deaths << endl;	//how many deaths there were
-
+	out << set2rule(birthRule) << endl;  //rule for cells to spawn
+	out << set2rule(survivalRule) << endl; //rule for cells to live
 	for (int i = 0; i < height; i++)	//tells the program what the matrix actually looked like
 	{
 		for (int j = 0; j < width; j++)
@@ -215,7 +219,7 @@ void Board::saveState(string fileName)
 void Board::addPattern(string fileName, int x, int y)
 {
 	ifstream in;
-	in.open(fileName.c_str());
+	in.open(fileName);
 
 	if (!in.is_open())
 	{
@@ -228,7 +232,6 @@ void Board::addPattern(string fileName, int x, int y)
 
 	heightOfSaved = fs_atoi(in);
 	widthOfSaved = fs_atoi(in);
-	cout << heightOfSaved << endl;
 	//initialize new patternMatrix
 	bool **patternMatrix = new bool *[heightOfSaved];
 	for(int i = 0; i < heightOfSaved; i++)

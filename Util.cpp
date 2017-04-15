@@ -1,4 +1,5 @@
 #include "Util.h"
+
 using namespace std;
 
 int fs_atoi(ifstream &input)
@@ -22,4 +23,20 @@ string separator()
 #else
     return "/";
 #endif
+}
+
+set<int> rule2set(string input)
+{
+	set<int> ret;
+	for(auto character : input)
+		ret.insert(atoi((const char*)&character));
+	return ret;
+}
+
+string set2rule(set<int> input)
+{
+	string ret = "";
+	for(auto value : input)
+		ret += '0' + char(value);
+	return ret;
 }

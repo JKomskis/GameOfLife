@@ -11,6 +11,8 @@ using namespace std;
 int fs_atoi(ifstream &input);
 bool endsWith(string s, string ending);
 string separator();
+set<int> rule2set(string input);
+string set2rule(set<int> input);
 
 struct BoardData{
     bool wrapAround;

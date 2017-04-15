@@ -2,11 +2,10 @@
 #ifndef FORMATS_H_
 #define FORMATS_H_
 
-#include "Util.h"
 #include <set>
+#include "Util.h"
 
 using namespace std;
-
 
 typedef struct{
 	int x;
