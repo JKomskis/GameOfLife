@@ -2,7 +2,6 @@
 #define PATTERN_H_
 
 #include <fstream>
-//#include <string>
 #include "Board.h"
 
 using namespace std;

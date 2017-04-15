@@ -2,14 +2,10 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
-//#include <string>
-#include <cstdlib>
+#include <iostream>
 #include "Formats.h"
 #include "Util.h"
-#include <vector>
-//#include "pattern.h"
 
-//using namespace std;
 class Board{
 
 protected:

@@ -2,8 +2,6 @@
 #include <panel.h>
 #include <form.h>
 #include <menu.h>
-//#include <string>
-//#include <vector>
 #include "Board.h"
 #include "Formats.h"
 #include "Pattern.h"
@@ -34,6 +32,7 @@ class Controller
         void ConfirmationBox(std::string dialog);
         void EditMode();
         void randomizeBoard(double ratio);
+        void KeybindingsBox();
         WINDOW* GetBoardWindow();
         bool GetYesOrNo(std::string dialog);
         int getMainMenuChoice();

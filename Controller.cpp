@@ -208,7 +208,8 @@ std::string Controller::getStateName()
 void Controller::setState(controlState newState)
 {
     state = newState;
-    updateStatusWin();
+    if(state != exiting)
+        updateStatusWin();
 }
 
 void Controller::setSpeed(int newSpeed)
@@ -450,15 +451,19 @@ void Controller::ConfirmationBox(std::string dialog)
     updateScreen();
 }
 
-/*void Controller::KeybindingsBox()
+void Controller::KeybindingsBox()
 {
-    WINDOW *dialogWin = newwin(15, dialog.size() + 4, termRow / 2 - 3, termCol / 2 - (dialog.size() + 4) / 2);
+    WINDOW *dialogWin = newwin(15, 38, termRow / 2 - 7, termCol / 2 - 19);
     keypad(dialogWin, TRUE);
     PANEL *dialogPanel = new_panel(dialogWin);
     box(dialogWin, 0, 0);
-    mvwprintw(dialogWin, 1, 1, "");
-    mvwprintw(dialogWin, 2, 1, "");
-    mvwprintw(dialogWin, 3, 1, "");
+    mvwprintw(dialogWin, 1, 1, "p : pause/resume");
+    mvwprintw(dialogWin, 2, 1, "[ : decrease speed");
+    mvwprintw(dialogWin, 3, 1, "] : increase speed");
+    mvwprintw(dialogWin, 4, 1, "Arrow Keys : move cursor");
+    mvwprintw(dialogWin, 5, 1, "a : add pattern");
+    mvwprintw(dialogWin, 6, 1, "; : rotate pattern counterclockwise");
+    mvwprintw(dialogWin, 7, 1, "' : rotate pattern clockwise");
     show_panel(dialogPanel);
     updateScreen();
     wgetch(dialogWin);
@@ -467,7 +472,7 @@ void Controller::ConfirmationBox(std::string dialog)
     delwin(dialogWin);
     del_panel(dialogPanel);
     updateScreen();
-}*/
+}
 
 void Controller::GetPatternDimensions(int &height, int &width)
 {
@@ -702,13 +707,12 @@ void Controller::EditMode()
     getmaxyx(boardWin, maxY, maxX);
     mvwaddch(boardWin, maxY / 2, maxX / 2, winch(boardWin)|A_STANDOUT);
     wmove(boardWin, maxY / 2, maxX / 2);
-	wchar_t input = getch();
 	int x = 0, y = 0;
 	//while((input = wgetch(boardWin)) != 'p')
     while(getState() == paused || getState() == editing)
     {
         updateScreen();
-        input = getch();
+        wchar_t input = getch();
         if( input == KEY_UP || input == KEY_DOWN || input == KEY_LEFT || input == KEY_RIGHT || input == ' ')
         {
             getyx(boardWin, y, x);
@@ -796,11 +800,16 @@ void Controller::EditMode()
                 if (state != editing)
                     setState(running);
                 break;
+            case 'k':
+                KeybindingsBox();
+                break;
             case 'a':
                 getyx(boardWin, y, x);
                 while(!isFileValid)
                 {
                     filename = getStringInput("Enter a filename:");
+                    if(filename == "")
+                        break;
                     try
                     {
                         pattern = new Pattern("patterns" + separator() + filename);
@@ -815,6 +824,8 @@ void Controller::EditMode()
                     }
                     isFileValid = true;
                 }
+                if(filename == "")
+                    break;
                 matrix = pattern->getMatrix();
                 RenderPattern(matrix);
                 do
@@ -878,6 +889,9 @@ void Controller::EditMode()
                             pattern->Rotate();
                             matrix = pattern->getMatrix();
                             RenderPattern(matrix);
+                            break;
+                        case 'k':
+                            KeybindingsBox();
                             break;
                         case 10:
                             board->addPattern(pattern->getMatrix(), y, x);

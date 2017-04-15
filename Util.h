@@ -1,11 +1,8 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-#include <iostream>
 #include <fstream>
-//#include <string>
 #include <stdlib.h>
-//#include <ctime>
 #include <vector>
 
 using namespace std;

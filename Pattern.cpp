@@ -1,13 +1,3 @@
-/*
- * pattern.cpp
- *
- *  Created on: Apr 6, 2017
- *      Author: erikabryant
- */
-
-#include <fstream>
-//#include <string>
-#include <iostream>
 #include "Pattern.h"
 
 //Constructor for the Pattern class

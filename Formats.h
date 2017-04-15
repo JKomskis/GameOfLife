@@ -2,10 +2,6 @@
 #ifndef FORMATS_H_
 #define FORMATS_H_
 
-//#include <string>
-#include <cstdlib>
-#include <vector>
-//#include "Board.h"
 #include "Util.h"
 
 using namespace std;

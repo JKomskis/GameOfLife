@@ -1,10 +1,3 @@
-// ConsoleApplication4.cpp : Defines the entry point for the console application.
-//
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <stdlib.h>
 #include "Board.h"
 
 using namespace std;

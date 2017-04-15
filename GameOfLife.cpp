@@ -1,6 +1,4 @@
 #include "Controller.h"
-#include <iostream>
-#include <stdlib.h>
 #include <ctime>
 #include <exception>
 
@@ -26,6 +24,8 @@ void MainMenu(Controller *controller)
 			while(!isFileValid)
 			{
 				filename = controller->getStringInput("Enter a filename:");
+				if(filename == "")
+					break;
 				try
 				{
 					controller->createNewBoard(filename);
@@ -36,6 +36,8 @@ void MainMenu(Controller *controller)
 				}
 				isFileValid = true;
 			}
+			if(filename == "")
+				break;
 			controller->setState(paused);
 			controller->printBoard();
 			break;
@@ -63,6 +65,7 @@ void MainMenu(Controller *controller)
 		}
 		case 4:
 			controller->setState(exiting);
+			break;
 	}
 
 }
@@ -77,7 +80,7 @@ int main()
     timeout(-1);
     curs_set(FALSE);
 	start_color();
-	init_pair(1, COLOR_RED, COLOR_BLACK);
+	init_pair(1, 9, COLOR_BLACK);
     keypad(stdscr, TRUE);
     Controller *controller = new Controller();
     controller->updateScreen();
@@ -106,6 +109,11 @@ int main()
 					controller->setSpeed(1);
 				else if (input == 'p') {
 					controller->setState(paused);
+					continue;
+				}
+				else if(input == 'k')
+				{
+					controller->KeybindingsBox();
 					continue;
 				}
 				else if (input == 27) {
