@@ -55,9 +55,12 @@ BoardData loadLife(string filename)
 		height++;
 	}
 	in.close();
-
+	set<int> birthRule = {3,};
+	set<int> survivalRule = {2, 3,};
 	// apply the data set
-	BoardData ret = {true, height, width, 0, 0, 0, vector<vector<bool>>(height, vector<bool> (width, 0))};
+	BoardData ret = {true, height, width, 0, 0, 0,
+		birthRule, survivalRule,
+		vector<vector<bool>>(height, vector<bool> (width, 0))};
 	//for(int i = 0; i < (int)toggleList.size(); i++)
 	for(auto xy : toggleList)
 		ret.matrix[xy.y][xy.x] = true;
@@ -85,7 +88,11 @@ BoardData loadRLE(string filename)
 			break;
 	// handle first line
 	sscanf(line.c_str(), "x = %d, y = %d%*s", &width, &height);
-	BoardData ret = {true, height, width, 0, 0, 0, vector<vector<bool>>(height, vector<bool> (width, 0))};
+	set<int> birthRule = {2,};
+	set<int> survivalRule = {2, 3,};
+	BoardData ret = {true, height, width, 0, 0, 0,
+		birthRule, survivalRule,
+		vector<vector<bool>>(height, vector<bool> (width, 0))};
 	int x=0, y=0;
 	while (getline(in, line))
 	{
@@ -163,8 +170,18 @@ BoardData loadBRD(string filename)
 	int iterations = fs_atoi(in);
 	int births = fs_atoi(in);
 	int deaths = fs_atoi(in);
+	set<int> birthRule;
+	set<int> survivalRule;
+	getline(in, line);
+	for(auto c : line)
+		birthRule.insert(atoi((const char*)&c));
+	getline(in, line);
+	for(auto c : line)
+		survivalRule.insert(atoi((const char*)&c));
+
 	BoardData ret = {wrapAround, height, width, iterations,
-		 			births, deaths, vector<vector<bool>>(height, vector<bool> (width, 0))};
+					births, deaths, birthRule, survivalRule,
+					vector<vector<bool>>(height, vector<bool> (width, 0))};
 
 	int row = 0;
 	string a;
@@ -197,11 +214,12 @@ BoardData loadFormat(string filename)
 	else
 		throw "Unknown File Type";
 }
+
 /*
 int main( int argc, char* args[] )
 {
-	Board *test = loadFormat("rlepack/copperhead.rle");
-	test->printBoard();
+	BoardData test = loadFormat("boards/smile.brd");
+	//test->printBoard();
 	cout << endl;
 
 	return 0;

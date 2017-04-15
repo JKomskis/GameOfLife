@@ -20,6 +20,8 @@ protected:
 	int births;
 	int deaths;
 	bool isSaved;
+	set<int> birthRule;
+	set<int> survivalRule;
 	//std::string fileName;	<--Do we need this in here????????
 
 public:

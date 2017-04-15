@@ -5,6 +5,8 @@ int fs_atoi(ifstream &input)
 {
 	string l;
 	getline(input, l);
+	if(input.eof())
+		throw "EOF Reached";
 	return atoi(l.c_str());
 }
 

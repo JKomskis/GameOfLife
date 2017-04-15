@@ -942,11 +942,11 @@ void Controller::SaveCurrent()
         std::string filename = getStringInput("Enter a filename:");
         if(state == editing)
         {
-            filename = "patterns/" + filename;
+            filename = "patterns" + separator() + filename;
         }
         else
         {
-            filename = "boards/" + filename;
+            filename = "boards" + separator() + filename;
         }
         board->saveState(filename);
     }

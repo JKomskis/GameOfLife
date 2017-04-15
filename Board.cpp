@@ -14,6 +14,8 @@ Board::Board(bool wrap, int h, int w): matrix(h, vector<bool> (w, 0))
 	this->births = 0;
 	this->deaths = 0;
 	isSaved = true;
+	birthRule = {3,};
+	survivalRule = {2, 3,};
 	/*matrix = new bool*[height];
 
 	for (int i = 0; i < height; i++)
@@ -42,7 +44,8 @@ Board::Board(string filename)
 	deaths = data.deaths;
 	isSaved = true;
 	matrix = data.matrix;
-
+	birthRule = data.birthRule;
+	survivalRule = data.survivalRule;
 }
 
 void Board::toggle(int r, int c)	//toggles the cell from true to false or false to true
@@ -130,27 +133,18 @@ void Board::runIteration()
 		{
 			if(matrix[r][c] == 1)	//if the cell is alive (equal to 1)
 			{
-				if(nMatrix[r][c] < 2)	//Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
+				if(survivalRule.find(nMatrix[r][c]) == survivalRule.end())
 				{
 					toggle(r, c);
 					deaths++;
-					//std::cout << "For " << r << ", " << c << " we changed it to a 0 because we had <2: " << nMatrix[r][c] <<endl;	//for testing purposes
 				}
-				else if(nMatrix[r][c] > 3)	//Any live cell with more than three live neighbours dies, as if by overpopulation.
-				{
-					toggle(r, c);
-					deaths++;
-					//std::cout << "For " << r << ", " << c << " we changed it to a 0 because we had >3: " << nMatrix[r][c] << endl;	//for testing purposes
-				}
-				//if neither of these is true, the cell stays alive
 			}
 			else	//if the cell is dead (equal to 0)
 			{
-				if(nMatrix[r][c] == 3)	//Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+				if(birthRule.find(nMatrix[r][c]) != birthRule.end())
 				{
 					toggle(r, c);
 					births++;
-					//std::cout << "For " << r << ", " << c << " we changed it to a 1 because we had ==3: " << nMatrix[r][c] << endl;	//for testing purposes
 				}
 			}
 		}

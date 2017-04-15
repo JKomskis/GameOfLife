@@ -3,6 +3,7 @@
 #define FORMATS_H_
 
 #include "Util.h"
+#include <set>
 
 using namespace std;
 

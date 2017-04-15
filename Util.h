@@ -4,6 +4,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <vector>
+#include <set>
 
 using namespace std;
 
@@ -18,6 +19,8 @@ struct BoardData{
     int iterations;
     int births;
     int deaths;
+	set<int> birthRule;
+	set<int> survivalRule;
     vector<vector<bool>> matrix;
 };
 
