@@ -16,20 +16,6 @@ Board::Board(bool wrap, int h, int w): matrix(h, vector<bool> (w, 0))
 	isSaved = true;
 	birthRule = {3,};
 	survivalRule = {2, 3,};
-	/*matrix = new bool*[height];
-
-	for (int i = 0; i < height; i++)
-	{
-		matrix[i] = new bool[width];
-	}*/
-
-	/*for (int i = 0; i < height; i++)
-	{
-		for (int j = 0; j < width; j++)
-		{
-			matrix[i][j] = 0;
-		}
-	}*/
 }
 
 //a constructor fot the board class if just a filename is given
@@ -179,12 +165,10 @@ vector<vector<bool>>& Board::getMatrix()
 //very useful for testing purposes
 void Board::printBoard()
 {
-	for(int i = 0; i < height; i++)
+	for(auto row : matrix)
 	{
-		for(int j = 0; j < width; j++)
-		{
-			cout << matrix[i][j] << " ";
-		}
+		for(auto cell : row)
+			cout << cell << " ";
 		cout << endl;
 	}
 	cout << "Birth Rule: " << set2rule(birthRule) << endl;

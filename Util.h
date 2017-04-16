@@ -9,6 +9,7 @@
 using namespace std;
 
 int fs_atoi(ifstream &input);
+bool startsWith(string s, string starting);
 bool endsWith(string s, string ending);
 string separator();
 set<int> rule2set(string input);

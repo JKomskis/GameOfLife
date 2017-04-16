@@ -15,15 +15,38 @@ BoardData loadLife(string filename)
 		(type != '5' && type != '6'))
 		throw "Invalid Life Header";
 
+
 	vector<coords> toggleList;
 	int width = 0, height = 0;
 	int x = 0, y = 0;
-	if (type == '5')
+	char birthBuf[11];
+	char survivalBuf[11];
+	set<int> birthRule = {3,};
+	set<int> survivalRule = {2, 3,};
+
+
+	while(getline(in, line))
 	{
-		while(getline(in, line))
+		// skip empty lines
+		if(line.size() == 0)
+			continue;
+			
+		// handle rule lines
+		if(startsWith(line, "#R "))
 		{
-			if(line.size() == 0 || line.at(0) == '#')
-				continue;
+			if(sscanf(line.c_str(), "#R %10s/%10s", birthBuf, survivalBuf) != 2)
+				throw "Error Parsing Rules";
+			birthRule = rule2set(birthBuf);
+			survivalRule = rule2set(survivalBuf);
+		}
+		
+		// skip all other comment lines
+		if(line.at(0) == '#')
+			continue;
+
+		// handle the type specific stuff
+		if (type == '5')
+		{
 			if(width != 0 && width != (int)line.length())
 				throw "Error: Non-rectangular matrix";
 			width = line.length();
@@ -34,36 +57,37 @@ BoardData loadLife(string filename)
 					toggleList.push_back(c);
 				}
 			y++;
-		};
-		height = y;
-	}
-	else
-	{
-		while(getline(in, line))
+			height = y;
+		}
+		else
 		{
-			if(line.size() == 0 || line.at(0) == '#')
-				continue;
+			// keep track of live coordinates
 			sscanf(line.c_str(), "%d %d", &x, &y);
+			coords c = {x, y};
+			toggleList.push_back(c);
+			
+			// keep updating width/height to ensure all coords fit
 			if(x > width)
 				width = x;
 			if(y > height)
 				height = y;
-			coords c = {x, y};
-			toggleList.push_back(c);
-		};
+		}
+	}
+	
+	// since coords are 0 based, we need to bump the width & height by 1
+	if(type == '6')
+	{
 		width++;
 		height++;
 	}
 	in.close();
-	set<int> birthRule = {3,};
-	set<int> survivalRule = {2, 3,};
 	// apply the data set
 	BoardData ret = {true, height, width, 0, 0, 0,
 		birthRule, survivalRule,
 		vector<vector<bool>>(height, vector<bool> (width, 0))};
 	//for(int i = 0; i < (int)toggleList.size(); i++)
-	for(auto xy : toggleList)
-		ret.matrix[xy.y][xy.x] = true;
+	for(auto coord : toggleList)
+		ret.matrix[coord.y][coord.x] = true;
 
 	return ret;
 
@@ -80,28 +104,48 @@ BoardData loadRLE(string filename)
 	string line;
 	int width = 0, height = 0;
 
-
+	// skip comments
 	while (getline(in, line))
 		if (line.at(0) == '#')
 			continue;
 		else
 			break;
-	// handle first line
-	sscanf(line.c_str(), "x = %d, y = %d%*s", &width, &height);
-	set<int> birthRule = {3,};
-	set<int> survivalRule = {2, 3,};
+
+	string rules;
+	char birthBuf[11];
+	char survivalBuf[11];
+	set<int> birthRule;
+	set<int> survivalRule;
+
+	// detected rule string
+	// %*1s is a cheap way to discard the prefix chars [bBsS]
+	if(sscanf(line.c_str(), "x = %d, y = %d, rule = %*1s%10s/%*1s%10s",
+		&width, &height, birthBuf, survivalBuf) == 4)
+	{
+		birthRule = rule2set(birthBuf);
+		survivalRule = rule2set(survivalBuf);
+	}
+	// no rule string, use defaults
+	else
+	{
+		sscanf(line.c_str(), "x = %d, y = %d%*s", &width, &height);
+		birthRule = {3,};
+		survivalRule = {2, 3,};
+	}
+	
 	BoardData ret = {true, height, width, 0, 0, 0,
 		birthRule, survivalRule,
 		vector<vector<bool>>(height, vector<bool> (width, 0))};
-	int x=0, y=0;
-	while (getline(in, line))
+	int x = 0, y = 0;
+	int count = 0;
+	bool quit = false;
+	while (getline(in, line) && !quit)
 	{
-		if (line.at(0) == '#')
-			continue;
-		int count = 0;
-		for (int i = 0; i < (int)line.length(); i++)
+		for (auto c : line)
 		{
-			char c = line.at(i);
+			// found a comment, get the next line
+			if(c == '#')
+				break;
 			// handle newlines
 			if (c == '\n' || c == '\r')
 				continue;
@@ -125,6 +169,7 @@ BoardData loadRLE(string filename)
 			}
 			if (c == '!')
 			{
+				quit = true;
 				break;
 			}
 
@@ -163,6 +208,7 @@ BoardData loadBRD(string filename)
 
 	string line;
 
+	// load relevant fields - 1 per line
 	int height = fs_atoi(in);
 	int width = fs_atoi(in);
 	bool wrapAround = fs_atoi(in);
@@ -171,6 +217,8 @@ BoardData loadBRD(string filename)
 	int deaths = fs_atoi(in);
 	set<int> birthRule;
 	set<int> survivalRule;
+
+	// load the rules (in the form of a string of numbers in ascii
 	getline(in, line);
 	birthRule = rule2set(line);
 	getline(in, line);
@@ -181,16 +229,11 @@ BoardData loadBRD(string filename)
 					vector<vector<bool>>(height, vector<bool> (width, 0))};
 
 	int row = 0;
-	string a;
+
+	// read & apply the matrix
 	while(getline(in, line))
-	{
 		for(int i = 0; i <width; i++)
-		{
-			a = line[i];
-			ret.matrix[row][i] = atoi(a.c_str());
-		}
-		row++;
-	}
+			ret.matrix[row++][i] = line[i] == '1';
 
 	in.close();
 	return ret;
@@ -215,7 +258,20 @@ BoardData loadFormat(string filename)
 /*
 int main( int argc, char* args[] )
 {
-	Board *test = new Board("boards/smile.brd");
+	Pattern *test;
+	test = new Pattern("format-test-cases/twogun.rle");
+	
+	while(getchar())
+	{
+		test->printBoard();
+		for(int i = 0; i < 99; i++)
+			test->Rotate();
+	}
+	
+	test->printBoard();
+	test = new Board("format-test-cases/life_106.life");
+	test->printBoard();
+	test = new Board("format-test-cases/twogun.rle");
 	test->printBoard();
 
 	return 0;

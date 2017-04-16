@@ -16,6 +16,11 @@ bool endsWith(string s, string ending)
 	return (s.rfind(ending) + ending.length()) == s.length();
 }
 
+bool startsWith(string s, string starting)
+{
+	return (s.find(starting) + starting.length()) == 0;
+}
+
 string separator()
 {
 #if defined WIN32 || defined _WIN32 || defined __CYGWIN__
