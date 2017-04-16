@@ -30,7 +30,7 @@ BoardData loadLife(string filename)
 		// skip empty lines
 		if(line.size() == 0)
 			continue;
-			
+
 		// handle rule lines
 		if(startsWith(line, "#R "))
 		{
@@ -39,7 +39,7 @@ BoardData loadLife(string filename)
 			birthRule = rule2set(birthBuf);
 			survivalRule = rule2set(survivalBuf);
 		}
-		
+
 		// skip all other comment lines
 		if(line.at(0) == '#')
 			continue;
@@ -65,7 +65,7 @@ BoardData loadLife(string filename)
 			sscanf(line.c_str(), "%d %d", &x, &y);
 			coords c = {x, y};
 			toggleList.push_back(c);
-			
+
 			// keep updating width/height to ensure all coords fit
 			if(x > width)
 				width = x;
@@ -73,7 +73,7 @@ BoardData loadLife(string filename)
 				height = y;
 		}
 	}
-	
+
 	// since coords are 0 based, we need to bump the width & height by 1
 	if(type == '6')
 	{
@@ -132,7 +132,7 @@ BoardData loadRLE(string filename)
 		birthRule = {3,};
 		survivalRule = {2, 3,};
 	}
-	
+
 	BoardData ret = {true, height, width, 0, 0, 0,
 		birthRule, survivalRule,
 		vector<vector<bool>>(height, vector<bool> (width, 0))};
@@ -228,12 +228,16 @@ BoardData loadBRD(string filename)
 					births, deaths, birthRule, survivalRule,
 					vector<vector<bool>>(height, vector<bool> (width, 0))};
 
+
 	int row = 0;
 
 	// read & apply the matrix
 	while(getline(in, line))
+	{
 		for(int i = 0; i <width; i++)
-			ret.matrix[row++][i] = line[i] == '1';
+			ret.matrix[row][i] = line.at(i) == '1';
+		row++;
+	}
 
 	in.close();
 	return ret;
@@ -260,14 +264,14 @@ int main( int argc, char* args[] )
 {
 	Pattern *test;
 	test = new Pattern("format-test-cases/twogun.rle");
-	
+
 	while(getchar())
 	{
 		test->printBoard();
 		for(int i = 0; i < 99; i++)
 			test->Rotate();
 	}
-	
+
 	test->printBoard();
 	test = new Board("format-test-cases/life_106.life");
 	test->printBoard();
