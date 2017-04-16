@@ -7,9 +7,7 @@ Board::Board(bool wrap, int h, int w): matrix(h, vector<bool> (w, 0))
 {
 	this->height = h;
 	this->width = w;
-
 	this->wrapAround = wrap;
-
 	this->iterations = 0;
 	this->births = 0;
 	this->deaths = 0;
@@ -18,7 +16,7 @@ Board::Board(bool wrap, int h, int w): matrix(h, vector<bool> (w, 0))
 	survivalRule = {2, 3,};
 }
 
-//a constructor fot the board class if just a filename is given
+//a constructor for the board class if just a filename is given
 Board::Board(string filename)
 {
 	BoardData data = loadFormat(filename);
@@ -49,7 +47,8 @@ void Board::randomize(double ratio)
 	{
 		for (int c = 0; c < width; c++)
 		{
-			if (((double)rand()/RAND_MAX) <= ratio) {
+			if (((double)rand()/RAND_MAX) <= ratio) 
+			{
 				toggle(r, c);
 			}
 		}
@@ -99,7 +98,7 @@ void Board::runIteration()
 
 	int **nMatrix = new int*[height];	//creates a new matrix
 
-	for (int i = 0; i < height; i++)
+	for (int i = 0; i < height; i++)	//make the second dimension of the matrix
 	{
 		nMatrix[i] = new int[width];
 	}
@@ -205,6 +204,7 @@ void Board::addPattern(string fileName, int x, int y)
 	ifstream in;
 	in.open(fileName);
 
+	//check if the file was able to be opened
 	if (!in.is_open())
 	{
 		cerr << "File not opened" << endl;
@@ -239,20 +239,6 @@ void Board::addPattern(string fileName, int x, int y)
 	{
 		cerr << "Saved Pattern is larger than board" << endl;
 	}
-
-	//now place patternMatrix in matrix
-	/*int countX = 0;
-	int countY = 0;
-	for(int i = y; i < y + heightOfSaved; i++)
-	{
-		for(int j = x; j < x + widthOfSaved; j++)
-		{
-			matrix[i][j] = patternMatrix[countX][countY];
-			countY++;
-		}
-		countX++;
-		countY = 0;
-	}*/
 
 	// pretty sure there's a bug here - 4/6/17 JJK
 	// x is supposed to be horizontal
