@@ -34,7 +34,8 @@ set<int> rule2set(string input)
 {
 	set<int> ret;
 	for(auto character : input)
-		ret.insert(atoi((const char*)&character));
+		if(isdigit(character))
+			ret.insert(atoi((const char*)&character));
 	return ret;
 }
 

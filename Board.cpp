@@ -49,7 +49,7 @@ void Board::randomize(double ratio)
 	{
 		for (int c = 0; c < width; c++)
 		{
-			if (((double)std::rand()/RAND_MAX) <= ratio) {
+			if (((double)rand()/RAND_MAX) <= ratio) {
 				toggle(r, c);
 			}
 		}
