@@ -17,7 +17,6 @@ class Controller
     Board *board = nullptr;
     MENU* mainMenu;
     int termRow, termCol;
-
     /*Speed is the frequency of iterations, in iterations/s.
     The system processes this as the period of iterations, or the delay between
     iterations (in ms).*/
@@ -49,8 +48,6 @@ class Controller
         void printCenter(WINDOW *win, std::string str, int row, int width);
         void SaveCurrent();
         void setState(controlState newState);
-        /*adds the value to the current value of speed. Prevents users from
-        decreasing below 1, and exceeding 10000 */
         void setSpeed(int newSpeed);
         void updateScreen();
         void updateStatusWin();
