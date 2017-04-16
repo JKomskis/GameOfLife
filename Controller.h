@@ -44,6 +44,7 @@ class Controller
         double getRatioInput();
         int getIntInput(std::string message);
         std::string getStringInput(std::string message);
+        void getRules();
         int getTermCol();
         int getTermRow();
         bool isSaved();

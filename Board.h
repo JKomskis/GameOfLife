@@ -43,7 +43,10 @@ public:	//public functions and variables
 	int getBirths();								//returns the number of births that occurred
 	int getDeaths();								//returns the number of deaths that occurred
 	bool getIsSaved();								//returns a boolean value of if the board has been saved
-
+	void setBirthRule(set<int> input);				//set a new birthing rule set
+	void setSurvivalRule(set<int> input);			//set a new survival rule set
+	string getBirthRule();					//return a formatted rule string for births
+	string getSurvivalRule();				//return a formatted rule string for survival
 };
 
 

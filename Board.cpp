@@ -298,6 +298,26 @@ bool Board::getIsSaved()
 	return isSaved;
 }
 
+void Board::setBirthRule(set<int> input)
+{
+	birthRule = input;
+}
+
+void Board::setSurvivalRule(set<int> input)
+{
+	survivalRule = input;
+}
+
+string Board::getBirthRule()
+{
+	return set2rule(birthRule);
+}
+
+string Board::getSurvivalRule()
+{
+	return set2rule(survivalRule);
+}
+
 //Used for testing purposes
 /*
 int main()

@@ -1,4 +1,5 @@
 #include "Controller.h"
+#include <iostream>
 
 #define MAIN_MENU_HEIGHT 8
 #define MAIN_MENU_WIDTH 28
@@ -313,7 +314,7 @@ void Controller::updateStatusWin()
     if (state == editing)
         mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:");
     else
-        mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tIterations:\tBirths:\tDeaths:\tSpeed:");
+        mvwprintw(statusWin, 1, 1, "Board Size:\tStatus:\tIterations:\tBirths:\tDeaths:\tSpeed:\tBirth Rule:\tSurvival Rule:");
     //pad the board size when it is small
     mvwprintw(statusWin, 3, 1, "%-3d", board->getHeight());
     wprintw(statusWin, " x ");
@@ -333,6 +334,11 @@ void Controller::updateStatusWin()
         /*speed variable is in iterations/second... make sure it is presented that
         way to the user (i.e. don't divide by 1000 or anything) */
         wprintw(statusWin, "%d", speed);
+        
+        wprintw(statusWin, "\t");
+        wprintw(statusWin, "%-9s", board->getBirthRule().c_str());
+        wprintw(statusWin, "\t");
+        wprintw(statusWin, "%-9s", board->getSurvivalRule().c_str());
     }
     mvwprintw(statusWin, 2, STATUS_WIDTH-15, "K: Keybindings");
     updateScreen();
@@ -415,6 +421,129 @@ std::string Controller::getStringInput(std::string message)
     del_panel(formPanel);
     updateScreen();
     return filename;
+}
+
+void Controller::getRules()
+{
+    //Show the cursor
+    curs_set(TRUE);
+    //Create the fields and configure them
+    FIELD *field[5];
+	int rows, cols;
+	field[0] = new_field(1, 20, 2, 0, 0, 0);
+    field[1] = new_field(1, 10, 2, 22, 0, 0);
+    field[2] = new_field(1, 20, 3, 0, 0, 0);
+    field[3] = new_field(1, 10, 3, 22, 0, 0);
+	field[4] = NULL;
+    field_opts_off(field[0], O_ACTIVE);
+    set_field_buffer(field[0], 0, "Birth Rule: ");
+	set_field_back(field[1], A_UNDERLINE);
+	field_opts_off(field[1], O_AUTOSKIP);
+    set_field_type(field[1], TYPE_INTEGER, 0, 1, 123456789);
+    field_opts_off(field[2], O_ACTIVE);
+    set_field_buffer(field[2], 0, "Survival Rule: ");
+    set_field_back(field[3], A_UNDERLINE);
+	field_opts_off(field[3], O_AUTOSKIP);
+    set_field_type(field[3], TYPE_INTEGER, 0, 1, 123456789);
+    //Create the form
+    FORM *form = new_form(field);
+    scale_form(form, &rows, &cols);
+    WINDOW *formWin = newwin(rows + 4, cols + 4, termRow / 2 - (rows + 4) / 2, termCol / 2 - cols / 2);
+    PANEL *formPanel = new_panel(formWin);
+    keypad(formWin, TRUE);
+    set_form_win(form, formWin);
+    WINDOW* subFormWin = derwin(formWin, rows, cols, 2, 2);
+    set_form_sub(form, subFormWin);
+    box(formWin, 0, 0);
+    printCenter(formWin, "Enter rules:", 1, cols + 4);
+    //display the form
+    post_form(form);
+    show_panel(formPanel);
+    updateScreen();
+    set<int> birthTemp, survivalTemp;
+    bool birthSelected = true;
+    wchar_t ch;
+    //Loop until the user enters valid values for both fields and presses enter
+    while((ch = wgetch(formWin)))
+    {
+        switch(ch)
+        {
+            //Switch fields
+            case KEY_UP:
+            case KEY_DOWN:
+            case '\t':
+                form_driver(form, REQ_NEXT_FIELD );
+                birthSelected ^= birthSelected;
+                break;
+            case KEY_LEFT:
+				form_driver(form, REQ_PREV_CHAR);
+				break;
+            case KEY_RIGHT:
+				form_driver(form, REQ_NEXT_CHAR);
+				break;
+            //Delete the character before the cursor
+            case '\b':
+            case KEY_BACKSPACE:
+                form_driver(form, REQ_PREV_CHAR);
+                form_driver(form, REQ_DEL_CHAR);
+                break;
+            //Delete the character at the cursor
+            case KEY_DC:
+                form_driver(form, REQ_DEL_CHAR);
+                break;
+            //Check the values of the fields
+            //If one is not filled, use the enter key to switch fields
+            case 10:
+                form_driver(form, REQ_VALIDATION);
+                if( birthTemp.size() == 0 || survivalTemp.size() == 0 )
+                {
+                    form_driver(form, REQ_NEXT_FIELD);
+                    break;
+                }
+                //set the new rules
+                board->setBirthRule(birthTemp);
+                board->setSurvivalRule(survivalTemp);
+                //delete the form
+                curs_set(FALSE);
+                unpost_form(form);
+                free_form(form);
+                for(int i = 0; i < 4; ++i)
+                {
+                    free_field(field[i]);
+                }
+                hide_panel(formPanel);
+                delwin(formWin);
+                del_panel(formPanel);
+                updateStatusWin();
+                updateScreen();
+                return;
+            case 27:
+				return;
+            // skip 0 entry
+			case '0':
+				break;
+            //Add the character to the field
+            default:
+				bool added = false;
+				int value = atoi((char*)&ch);
+				if(birthSelected)
+				{
+					if(birthTemp.find(value) == birthTemp.end())
+					{
+						birthTemp.insert(value);
+						added = true;
+					}
+				}
+				else if(survivalTemp.find(value) == survivalTemp.end())
+				{
+					survivalTemp.insert(value);
+					added = true;
+				}
+				if(added)
+					form_driver(form, ch);
+                break;
+        }
+    }
 }
 
 /*Postconditions: displays the board in the board window
@@ -550,6 +679,7 @@ void Controller::KeybindingsBox()
     mvwprintw(dialogWin, 5, 1, "a : add pattern");
     mvwprintw(dialogWin, 6, 1, "; : rotate pattern counterclockwise");
     mvwprintw(dialogWin, 7, 1, "' : rotate pattern clockwise");
+    mvwprintw(dialogWin, 8, 1, "r : edit rules");
     show_panel(dialogPanel);
     updateScreen();
     //wait for a keypress
@@ -844,6 +974,11 @@ void Controller::EditMode()
             case 'p':
                 if (state != editing)
                     setState(running);
+                break;
+            //get birth/survival rules
+            case 'r':
+                if (state != editing)
+                    getRules();
                 break;
             //display the keybindings box
             case 'k':
