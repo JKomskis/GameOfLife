@@ -93,7 +93,7 @@ int main()
     curs_set(FALSE);
 	start_color();
 	//9 corresponds to bright red
-	init_pair(1, COLOR_RED, COLOR_BLACK);
+	init_pair(1, 9, COLOR_BLACK);
 	//Allows use of the arrow keys
     keypad(stdscr, TRUE);
 

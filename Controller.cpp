@@ -679,13 +679,14 @@ double Controller::getRatioInput()
     //create the form
 	FORM *form = new_form(field);
 	scale_form(form, &rows, &cols);
-    WINDOW *formWin = newwin(rows + 4, cols + 4, termRow / 2 - (rows + 4) / 2, termCol / 2 - termCol / 8);
+    WINDOW *formWin = newwin(rows + 6, cols + 4, termRow / 2 - (rows + 6) / 2, termCol / 2 - termCol / 8);
     PANEL *formPanel = new_panel(formWin);
     keypad(formWin, TRUE);
     set_form_win(form, formWin);
-    set_form_sub(form, derwin(formWin, rows, cols, 2, 2));
+    set_form_sub(form, derwin(formWin, rows, cols, 3, 2));
     box(formWin, 0, 0);
-    printCenter(formWin, "Enter a percentage of cells to turn live:", 1, cols);
+    printCenter(formWin, "Enter a percentage of", 1, cols);
+    printCenter(formWin, "cells to turn live:", 2, cols);
 	post_form(form);
     show_panel(formPanel);
 	updateScreen();
