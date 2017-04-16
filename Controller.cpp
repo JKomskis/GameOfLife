@@ -473,7 +473,18 @@ void Controller::getRules()
             case KEY_DOWN:
             case '\t':
                 form_driver(form, REQ_NEXT_FIELD );
-                birthSelected ^= birthSelected;
+                // clear form & rule set when changing to new rule
+                birthSelected = birthSelected ? false : true;
+                if(birthSelected)
+                {
+					set_field_buffer(field[1], 0, "");
+					birthTemp.clear();
+				}
+				else
+                {
+					set_field_buffer(field[3], 0, "");
+					survivalTemp.clear();
+				}
                 break;
             case KEY_LEFT:
 				form_driver(form, REQ_PREV_CHAR);
