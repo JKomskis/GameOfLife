@@ -631,26 +631,27 @@ void Controller::GetPatternDimensions(int &height, int &width)
                 form_driver(form, REQ_VALIDATION);
                 heightInput = atoi( field_buffer(field[1], 0) );
                 widthInput = atoi( field_buffer(field[3], 0) );
-                if(heightInput != 0 && widthInput != 0 )
+                if( (heightInput == 0) ^ (widthInput == 0) )
                 {
-                    height = heightInput;
-                    width = widthInput;
-                    //delete the form
-                    curs_set(FALSE);
-                    unpost_form(form);
-                    free_form(form);
-                    for(int i = 0; i < 4; ++i)
-                    {
-                        free_field(field[i]);
-                    }
-                    hide_panel(formPanel);
-                    delwin(formWin);
-                    del_panel(formPanel);
-                    updateScreen();
-                    return;
+                    form_driver(form, REQ_NEXT_FIELD);
+                    break;
                 }
-                form_driver(form, REQ_NEXT_FIELD);
-                break;
+                height = heightInput;
+                width = widthInput;
+                //delete the form
+                curs_set(FALSE);
+                unpost_form(form);
+                free_form(form);
+                for(int i = 0; i < 4; ++i)
+                {
+                    free_field(field[i]);
+                }
+                hide_panel(formPanel);
+                delwin(formWin);
+                del_panel(formPanel);
+                updateScreen();
+                return;
+
             //Add the character to the field
             default:
                 form_driver(form, ch);

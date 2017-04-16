@@ -63,6 +63,9 @@ void MainMenu(Controller *controller)
 			int height = 0;
 			int width = 0;
 			controller->GetPatternDimensions(height, width);
+			//If the user entered nothing, cancel loading the pattern editor
+			if(height == 0 && width == 0)
+				break;
 			controller->createNewBoard(false, height, width);
 			controller->setState(editing);
 			controller->printBoard();
@@ -90,7 +93,7 @@ int main()
     curs_set(FALSE);
 	start_color();
 	//9 corresponds to bright red
-	init_pair(1, 9, COLOR_BLACK);
+	init_pair(1, COLOR_RED, COLOR_BLACK);
 	//Allows use of the arrow keys
     keypad(stdscr, TRUE);
 

@@ -3,6 +3,8 @@
 #define FORMATS_H_
 
 #include <set>
+#include <string>
+#include <vector>
 #include "Util.h"
 
 using namespace std;

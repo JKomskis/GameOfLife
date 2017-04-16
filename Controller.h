@@ -2,6 +2,8 @@
 #include <panel.h>
 #include <form.h>
 #include <menu.h>
+#include <vector>
+#include <string>
 #include "Board.h"
 #include "Formats.h"
 #include "Pattern.h"

@@ -3,6 +3,8 @@
 #define BOARD_H_
 
 #include <iostream>
+#include <vector>
+#include <string>
 #include "Formats.h"
 #include "Util.h"
 
@@ -22,7 +24,6 @@ protected:
 	bool isSaved;
 	set<int> birthRule;
 	set<int> survivalRule;
-	//std::string fileName;	<--Do we need this in here????????
 
 public:
 

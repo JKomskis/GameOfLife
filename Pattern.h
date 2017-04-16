@@ -1,8 +1,9 @@
 #ifndef PATTERN_H_
 #define PATTERN_H_
 
-#include <fstream>
 #include "Board.h"
+#include <vector>
+#include <string>
 
 using namespace std;
 

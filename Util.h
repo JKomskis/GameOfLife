@@ -4,6 +4,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <vector>
+#include <string>
 #include <set>
 
 using namespace std;
