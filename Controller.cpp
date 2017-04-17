@@ -1,5 +1,4 @@
 #include "Controller.h"
-#include <iostream>
 
 #define MAIN_MENU_HEIGHT 8
 #define MAIN_MENU_WIDTH 28
@@ -7,8 +6,6 @@
 #define BOARD_WIDTH termCol
 #define STATUS_HEIGHT 5
 #define STATUS_WIDTH termCol
-
-#include <iostream>
 
 Controller::Controller()
 {
@@ -334,7 +331,7 @@ void Controller::updateStatusWin()
         /*speed variable is in iterations/second... make sure it is presented that
         way to the user (i.e. don't divide by 1000 or anything) */
         wprintw(statusWin, "%d", speed);
-        
+
         wprintw(statusWin, "\t");
         wprintw(statusWin, "%-9s", board->getBirthRule().c_str());
         wprintw(statusWin, "\t");
@@ -439,12 +436,12 @@ void Controller::getRules()
     set_field_buffer(field[0], 0, "Birth Rule: ");
 	set_field_back(field[1], A_UNDERLINE);
 	field_opts_off(field[1], O_AUTOSKIP);
-    set_field_type(field[1], TYPE_INTEGER, 0, 1, 123456789);
+    set_field_type(field[1], TYPE_INTEGER, 0, 0, 123456789);
     field_opts_off(field[2], O_ACTIVE);
     set_field_buffer(field[2], 0, "Survival Rule: ");
     set_field_back(field[3], A_UNDERLINE);
 	field_opts_off(field[3], O_AUTOSKIP);
-    set_field_type(field[3], TYPE_INTEGER, 0, 1, 123456789);
+    set_field_type(field[3], TYPE_INTEGER, 0, 0, 123456789);
     //Create the form
     FORM *form = new_form(field);
     scale_form(form, &rows, &cols);
@@ -475,16 +472,6 @@ void Controller::getRules()
                 form_driver(form, REQ_NEXT_FIELD );
                 // clear form & rule set when changing to new rule
                 birthSelected = birthSelected ? false : true;
-                if(birthSelected)
-                {
-					set_field_buffer(field[1], 0, "");
-					birthTemp.clear();
-				}
-				else
-                {
-					set_field_buffer(field[3], 0, "");
-					survivalTemp.clear();
-				}
                 break;
             case KEY_LEFT:
 				form_driver(form, REQ_PREV_CHAR);
@@ -496,24 +483,39 @@ void Controller::getRules()
             case '\b':
             case KEY_BACKSPACE:
                 form_driver(form, REQ_PREV_CHAR);
+
+                //remove deleted character from set
+                if(birthSelected)
+					birthTemp.erase((char)winch(subFormWin) - '0');
+				else
+					survivalTemp.erase((char)winch(subFormWin) - '0');
+
                 form_driver(form, REQ_DEL_CHAR);
                 break;
+
             //Delete the character at the cursor
             case KEY_DC:
+                //remove deleted character from set
+                if(birthSelected)
+					birthTemp.erase((char)winch(subFormWin) - '0');
+				else
+					survivalTemp.erase((char)winch(subFormWin) - '0');
+
                 form_driver(form, REQ_DEL_CHAR);
                 break;
+
             //Check the values of the fields
             //If one is not filled, use the enter key to switch fields
             case 10:
                 form_driver(form, REQ_VALIDATION);
-                if( birthTemp.size() == 0 || survivalTemp.size() == 0 )
-                {
-                    form_driver(form, REQ_NEXT_FIELD);
-                    break;
-                }
+                //if( birthTemp.size() == 0 || survivalTemp.size() == 0 )
+                //{
+                    //form_driver(form, REQ_NEXT_FIELD);
+                    //break;
+                //}
                 //set the new rules
-                board->setBirthRule(birthTemp);
-                board->setSurvivalRule(survivalTemp);
+                board->setBirthRule(rule2set(string(field_buffer(field[1], 0))));
+                board->setSurvivalRule(rule2set(string(field_buffer(field[3], 0))));
                 //delete the form
                 curs_set(FALSE);
                 unpost_form(form);
@@ -531,8 +533,6 @@ void Controller::getRules()
             case 27:
 				return;
             // skip 0 entry
-			case '0':
-				break;
             //Add the character to the field
             default:
 				bool added = false;
