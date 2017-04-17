@@ -472,7 +472,6 @@ void Controller::getRules()
             case '\t':
                 form_driver(form, REQ_NEXT_FIELD );
                 birthSelected = birthSelected ? false : true;
-                
                 birthTemp = rule2set(string(field_buffer(field[1], 0)));
                 survivalTemp = rule2set(string(field_buffer(field[3], 0)));
                 break;
@@ -532,9 +531,12 @@ void Controller::getRules()
 				return;
             //Add the character to the field
             default:
+                form_driver(form, REQ_VALIDATION);
 				value = atoi((char*)&ch);
+						form_driver(form, REQ_END_FIELD);
 				if(birthSelected)
 				{
+					birthTemp = rule2set(string(field_buffer(field[1], 0)));
 					if(birthTemp.find(value) == birthTemp.end())
 					{
 						form_driver(form, ch);
@@ -542,10 +544,14 @@ void Controller::getRules()
 
 					}
 				}
-				else if(survivalTemp.find(value) == survivalTemp.end())
+				else
 				{
-					form_driver(form, ch);
 					survivalTemp = rule2set(string(field_buffer(field[3], 0)));
+					if(survivalTemp.find(value) == survivalTemp.end())
+					{
+						form_driver(form, ch);
+						survivalTemp = rule2set(string(field_buffer(field[3], 0)));
+					}
 				}
                 break;
         }
