@@ -473,6 +473,9 @@ void Controller::getRules()
             case '\t':
                 form_driver(form, REQ_NEXT_FIELD );
                 birthSelected = birthSelected ? false : true;
+                
+                birthTemp = rule2set(string(field_buffer(field[1], 0)));
+                survivalTemp = rule2set(string(field_buffer(field[3], 0)));
                 break;
             case KEY_LEFT:
 				form_driver(form, REQ_PREV_CHAR);
