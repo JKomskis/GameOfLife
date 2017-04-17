@@ -460,7 +460,6 @@ void Controller::getRules()
     set<int> birthTemp, survivalTemp;
     bool birthSelected = true;
     wchar_t ch;
-	bool added = false;
 	int value = 0;
     //Loop until the user enters valid values for both fields and presses enter
     while((ch = wgetch(formWin)))
@@ -533,27 +532,21 @@ void Controller::getRules()
 				return;
             //Add the character to the field
             default:
-				added = false;
 				value = atoi((char*)&ch);
 				if(birthSelected)
 				{
 					if(birthTemp.find(value) == birthTemp.end())
 					{
-						birthTemp.insert(value);
-						added = true;
+						form_driver(form, ch);
+						birthTemp = rule2set(string(field_buffer(field[1], 0)));
+
 					}
 				}
 				else if(survivalTemp.find(value) == survivalTemp.end())
 				{
-					survivalTemp.insert(value);
-					added = true;
-				}
-
-				if(added)
-				{
 					form_driver(form, ch);
-					added = false;
-                }
+					survivalTemp = rule2set(string(field_buffer(field[3], 0)));
+				}
                 break;
         }
     }
