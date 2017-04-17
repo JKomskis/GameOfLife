@@ -167,10 +167,10 @@ void Controller::createNewBoard(std::string filename)
     {
         throw "Board is too big!";
     }
-    // width = (width > 0) ? width:1;
-    // width = (width <= BOARD_WIDTH-2) ? width:BOARD_WIDTH-2;
-    // height = (height > 0) ? height:1;
-    // height = (height <= BOARD_HEIGHT-2) ? height:BOARD_HEIGHT-2;
+    width = (width > 0) ? width:1;
+    width = (width <= BOARD_WIDTH-2) ? width:BOARD_WIDTH-2;
+    height = (height > 0) ? height:1;
+    height = (height <= BOARD_HEIGHT-2) ? height:BOARD_HEIGHT-2;
     //Create a new board window to display the board
     WINDOW *boardWin = newwin(height+2, width+2, (BOARD_HEIGHT-height)/2-1, (BOARD_WIDTH-width)/2-1);
     boardPanel = new_panel(boardWin);
@@ -460,6 +460,8 @@ void Controller::getRules()
     set<int> birthTemp, survivalTemp;
     bool birthSelected = true;
     wchar_t ch;
+	bool added = false;
+	int value = 0;
     //Loop until the user enters valid values for both fields and presses enter
     while((ch = wgetch(formWin)))
     {
@@ -470,7 +472,6 @@ void Controller::getRules()
             case KEY_DOWN:
             case '\t':
                 form_driver(form, REQ_NEXT_FIELD );
-                // clear form & rule set when changing to new rule
                 birthSelected = birthSelected ? false : true;
                 break;
             case KEY_LEFT:
@@ -508,11 +509,6 @@ void Controller::getRules()
             //If one is not filled, use the enter key to switch fields
             case 10:
                 form_driver(form, REQ_VALIDATION);
-                //if( birthTemp.size() == 0 || survivalTemp.size() == 0 )
-                //{
-                    //form_driver(form, REQ_NEXT_FIELD);
-                    //break;
-                //}
                 //set the new rules
                 board->setBirthRule(rule2set(string(field_buffer(field[1], 0))));
                 board->setSurvivalRule(rule2set(string(field_buffer(field[3], 0))));
@@ -532,11 +528,10 @@ void Controller::getRules()
                 return;
             case 27:
 				return;
-            // skip 0 entry
             //Add the character to the field
             default:
-				bool added = false;
-				int value = atoi((char*)&ch);
+				added = false;
+				value = atoi((char*)&ch);
 				if(birthSelected)
 				{
 					if(birthTemp.find(value) == birthTemp.end())
@@ -550,8 +545,12 @@ void Controller::getRules()
 					survivalTemp.insert(value);
 					added = true;
 				}
+
 				if(added)
+				{
 					form_driver(form, ch);
+					added = false;
+                }
                 break;
         }
     }
